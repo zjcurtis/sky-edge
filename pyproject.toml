@@ -5,6 +5,7 @@ description = "sky-edge is an opinionated API client for Blackbaud Raiser's Edge
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "pydantic>=2.12.3",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
     "werkzeug>=3.1.3",
