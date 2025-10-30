@@ -1,30 +1,43 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 
+from pydantic import BaseModel
+
 from ..auth import AppTokens
-from ..util import HttpMethods, generic_request
+from ..util import FuzzyDate, HttpMethods, generic_request
 
 
-@dataclass
-class ConstituentId:
-    value: str
+class Address(BaseModel):
+    id: str | None = None
+    address_lines: str | None = None
+    city: str | None = None
+    constituent_id: str
+    country: str | None = None
+    county: str | None = None
+    date_added: datetime | None = None
+    date_modified: datetime | None = None
+    do_not_mail: bool | None = None
+    end: datetime | None = None
+    formatted_address: str | None = None
+    inactive: bool | None = None
+    postal_code: str | None = None
+    preferred: bool | None = None
+    seasonal_end: FuzzyDate | None = None
+    seasonal_start: FuzzyDate | None = None
+    start: datetime | None = None
+    state: str | None = None
+    suburb: str | None = None
+    type: str
+    region: str | None = None
+    information_source: str | None = None
+    lot: str | None = None
+    cart: str | None = None
+    dpc: str | None = None
 
 
-@dataclass
-class PhoneId:
-    value: str
-
-
-@dataclass
-class EmailId:
-    value: str
-
-
-@dataclass
-class Phone:
-    id: PhoneId
-    constituent_id: ConstituentId
+class Phone(BaseModel):
+    id: str
+    constituent_id: str
     date_added: datetime
     date_modified: datetime
     do_not_call: bool
@@ -34,11 +47,10 @@ class Phone:
     type: str
 
 
-@dataclass
-class Email:
-    id: EmailId
+class Email(BaseModel):
+    id: str
     address: str
-    constituent_id: ConstituentId
+    constituent_id: str
     date_added: datetime
     date_modified: datetime
     do_not_email: bool
@@ -47,18 +59,65 @@ class Email:
     type: str
 
 
-@dataclass
-class CollectionOfEmails:
+class Collection(BaseModel):
     count: int
+    next_link: Optional[str] = None
+
+
+class CollectionOfAddresses(Collection):
+    value: List[Address]
+
+
+class CollectionOfEmails(Collection):
     value: List[Email]
-    next_link: Optional[str] = None
 
 
-@dataclass
-class CollectionOfPhones:
-    count: int
+class CollectionOfPhones(Collection):
     value: List[Phone]
-    next_link: Optional[str] = None
+
+
+def address_post(address: Address, apptokens: AppTokens) -> Address | int:
+    response = generic_request(
+        method=HttpMethods.POST,
+        url="https://api.sky.blackbaud.com/constituent/v1/addresses",
+        data=address.model_dump_json(exclude_none=True),
+        apptokens=apptokens,
+    )
+    match response.status_code:
+        case 200:
+            if response.json()["id"]:
+                address.id = response.json()["id"]
+            return address
+        case _:
+            return response.status_code
+
+
+def address_delete(address: Address, apptokens: AppTokens) -> int:
+    return generic_request(
+        method=HttpMethods.DELETE,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/addresses/{address.id}",
+        apptokens=apptokens,
+    ).status_code
+
+
+def address_list_constituent_get(
+    constituent_id: str, apptokens: AppTokens, include_inactive: bool = False
+) -> CollectionOfAddresses | int:
+    url = ""
+    if include_inactive:
+        url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses?include_inactive=true"
+    else:
+        url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses"
+    response = generic_request(
+        method=HttpMethods.GET,
+        url=url,
+        apptokens=apptokens,
+    )
+    match response.status_code:
+        case 200:
+            return CollectionOfAddresses.model_validate_json(json_data=response.text)
+        case _:
+            return response.status_code
 
 
 def email_list_all_get(apptokens: AppTokens, **kwargs) -> CollectionOfEmails | int:
@@ -76,30 +135,30 @@ def email_list_all_get(apptokens: AppTokens, **kwargs) -> CollectionOfEmails | i
 
 
 def email_list_constituent_get(
-    constituent_id: ConstituentId, apptokens: AppTokens
+    constituent_id: str, apptokens: AppTokens
 ) -> CollectionOfEmails | int:
     response = generic_request(
         method=HttpMethods.GET,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id.value}/emailaddresses",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses",
         apptokens=apptokens,
     )
     match response.status_code:
         case 200:
-            return CollectionOfEmails(**response.json())
+            return CollectionOfEmails.model_validate_json(json_data=response.text)
         case _:
             return response.status_code
 
 
-def email_delete(email_id: EmailId, apptokens: AppTokens) -> int:
+def email_delete(email: Email, apptokens: AppTokens) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/emailaddresses/{email_id.value}",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/emailaddresses/{email.id}",
         apptokens=apptokens,
     ).status_code
 
 
 def phone_list_constituent_get(
-    constituent_id: ConstituentId, apptokens: AppTokens
+    constituent_id: str, apptokens: AppTokens
 ) -> CollectionOfPhones | int:
     response = generic_request(
         method=HttpMethods.GET,
@@ -113,9 +172,9 @@ def phone_list_constituent_get(
             return response.status_code
 
 
-def phone_delete(phone_id: PhoneId, apptokens: AppTokens) -> int:
+def phone_delete(phone: Phone, apptokens: AppTokens) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone_id.value}",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
         apptokens=apptokens,
     ).status_code
