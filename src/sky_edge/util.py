@@ -1,6 +1,7 @@
 from enum import StrEnum
 
 from requests import Response, request
+from pydantic import BaseModel
 
 from .auth import BB_API_SUBSCRIPTION_KEY, AppTokens
 
@@ -13,6 +14,13 @@ class HttpMethods(StrEnum):
     PUT = "PUT"
     PATCH = "PATCH"
     DELETE = "DELETE"
+
+
+class FuzzyDate(BaseModel):
+    # for API compatibility the single letter attributes are used for day, month, year
+    d: int | None = None
+    m: int | None = None
+    y: int | None = None
 
 
 def generic_request(

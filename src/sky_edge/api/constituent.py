@@ -1,10 +1,32 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
 
 from ..auth import AppTokens
-from ..util import HttpMethods, generic_request
+from ..util import HttpMethods, generic_request, FuzzyDate
+
+
+class Address(BaseModel):
+    id: str | None = None
+    address_lines: str | None = None
+    city: str | None = None
+    constituent_id: str
+    country: str | None = None
+    county: str | None = None
+    do_not_mail: bool | None = None
+    end: datetime | None = None
+    postal_code: str | None = None
+    preferred: bool | None = None
+    seasonal_end: FuzzyDate | None = None
+    start: datetime | None = None
+    state: str | None = None
+    suburb: str | None = None
+    type: str
+    information_source: str | None = None
+    lot: str | None = None
+    cart: str | None = None
+    dpc: str | None = None
+    region: str | None = None
 
 
 class Phone(BaseModel):
@@ -36,12 +58,31 @@ class Collection(BaseModel):
     next_link: Optional[str] = None
 
 
+class CollectionOfAddresses(Collection):
+    value: List[Address]
+
+
 class CollectionOfEmails(Collection):
     value: List[Email]
 
 
 class CollectionOfPhones(Collection):
     value: List[Phone]
+
+
+def address_list_constituent_get(
+    constituent_id: str, apptokens: AppTokens
+) -> CollectionOfAddresses | int:
+    response = generic_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses",
+        apptokens=apptokens,
+    )
+    match response.status_code:
+        case 200:
+            return CollectionOfAddresses.model_validate_json(json_data=response.text)
+        case _:
+            return response.status_code
 
 
 def email_list_all_get(apptokens: AppTokens, **kwargs) -> CollectionOfEmails | int:
