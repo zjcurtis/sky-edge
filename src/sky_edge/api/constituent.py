@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import List, Optional
+
 from pydantic import BaseModel
 
 from ..auth import AppTokens
-from ..util import HttpMethods, generic_request, FuzzyDate
+from ..util import FuzzyDate, HttpMethods, generic_request
 
 
 class Address(BaseModel):

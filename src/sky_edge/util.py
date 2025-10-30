@@ -1,9 +1,9 @@
 from enum import StrEnum
 
-from requests import Response, request
 from pydantic import BaseModel
+from requests import Response, request
 
-from .auth import BB_API_SUBSCRIPTION_KEY, AppTokens
+from .auth import BB_API_SUBSCRIPTION_KEY, AppTokens, request_token
 
 
 class HttpMethods(StrEnum):
@@ -31,7 +31,17 @@ def generic_request(
         "Bb-Api-Subscription-Key": BB_API_SUBSCRIPTION_KEY,
         "Content-Type": "application/json",
     }
+    reify = None
     if json == None:
-        return request(method=method, url=url, headers=headers, **kwargs)
+        reify = lambda x: request(method=method, url=url, headers=x, **kwargs)
     else:
-        return request(method=method, url=url, headers=headers, json=json, **kwargs)
+        reify = lambda x: request(
+            method=method, url=url, headers=x, json=json, **kwargs
+        )
+    response = reify(x=headers)
+    if response.status_code == 403:
+        fresh_tokens = request_token(input=apptokens)
+        headers["authorization"] = f"Bearer {fresh_tokens.access_token}"
+        return reify(x=headers)
+    else:
+        return response
