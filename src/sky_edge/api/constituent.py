@@ -14,20 +14,25 @@ class Address(BaseModel):
     constituent_id: str
     country: str | None = None
     county: str | None = None
+    date_added: datetime | None = None
+    date_modified: datetime | None = None
     do_not_mail: bool | None = None
     end: datetime | None = None
+    formatted_address: str | None = None
+    inactive: bool | None = None
     postal_code: str | None = None
     preferred: bool | None = None
     seasonal_end: FuzzyDate | None = None
+    seasonal_start: FuzzyDate | None = None
     start: datetime | None = None
     state: str | None = None
     suburb: str | None = None
     type: str
+    region: str | None = None
     information_source: str | None = None
     lot: str | None = None
     cart: str | None = None
     dpc: str | None = None
-    region: str | None = None
 
 
 class Phone(BaseModel):
@@ -96,7 +101,7 @@ def address_delete(address: Address, apptokens: AppTokens) -> int:
 
 
 def address_list_constituent_get(
-    constituent_id: str, apptokens: AppTokens, include_inactive: bool=False
+    constituent_id: str, apptokens: AppTokens, include_inactive: bool = False
 ) -> CollectionOfAddresses | int:
     url = ""
     if include_inactive:
