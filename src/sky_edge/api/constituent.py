@@ -103,11 +103,10 @@ def address_delete(address: Address, apptokens: AppTokens) -> int:
 def address_list_constituent_get(
     constituent_id: str, apptokens: AppTokens, include_inactive: bool = False
 ) -> CollectionOfAddresses | int:
-    url = ""
+    url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses"
     if include_inactive:
-        url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses?include_inactive=true"
-    else:
-        url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses"
+        url = f"{url}?include_inactive=true"
+
     response = generic_request(
         method=HttpMethods.GET,
         url=url,
