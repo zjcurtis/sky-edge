@@ -31,16 +31,17 @@ class Email(BaseModel):
     type: str
 
 
-class CollectionOfEmails(BaseModel):
+class Collection(BaseModel):
     count: int
+    next_link: Optional[str] = None
+
+
+class CollectionOfEmails(Collection):
     value: List[Email]
-    next_link: Optional[str] = None
 
 
-class CollectionOfPhones(BaseModel):
-    count: int
+class CollectionOfPhones(Collection):
     value: List[Phone]
-    next_link: Optional[str] = None
 
 
 def email_list_all_get(apptokens: AppTokens, **kwargs) -> CollectionOfEmails | int:
