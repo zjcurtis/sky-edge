@@ -24,7 +24,7 @@ class FuzzyDate(BaseModel):
 
 
 def generic_request(
-    method: HttpMethods, url: str, apptokens: AppTokens, json = None, **kwargs
+    method: HttpMethods, url: str, apptokens: AppTokens, json=None, **kwargs
 ) -> Response:
     headers = {
         "authorization": f"Bearer {apptokens.access_token}",
@@ -34,4 +34,4 @@ def generic_request(
     if json == None:
         return request(method=method, url=url, headers=headers, **kwargs)
     else:
-        return request(method=method, url=url, headers=headers,json=json,**kwargs)
+        return request(method=method, url=url, headers=headers, json=json, **kwargs)
