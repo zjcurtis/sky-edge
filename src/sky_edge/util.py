@@ -24,11 +24,14 @@ class FuzzyDate(BaseModel):
 
 
 def generic_request(
-    method: HttpMethods, url: str, apptokens: AppTokens, **kwargs
+    method: HttpMethods, url: str, apptokens: AppTokens, json = None, **kwargs
 ) -> Response:
     headers = {
         "authorization": f"Bearer {apptokens.access_token}",
         "Bb-Api-Subscription-Key": BB_API_SUBSCRIPTION_KEY,
         "Content-Type": "application/json",
     }
-    return request(method=method, url=url, headers=headers, **kwargs)
+    if json == None:
+        return request(method=method, url=url, headers=headers, **kwargs)
+    else:
+        return request(method=method, url=url, headers=headers,json=json,**kwargs)

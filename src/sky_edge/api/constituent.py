@@ -69,6 +69,16 @@ class CollectionOfEmails(Collection):
 class CollectionOfPhones(Collection):
     value: List[Phone]
 
+def address_post(address: Address, apptokens: AppTokens) -> Address | int:
+    print(address.model_dump_json(exclude_none=True))
+    response = generic_request(method=HttpMethods.POST,url="https://api.sky.blackbaud.com/constituent/v1/addresses",data=address.model_dump_json(exclude_none=True),apptokens=apptokens)
+    match response.status_code:
+        case 200:
+            if response.json()['id']:
+                address.id = response.json()['id']
+            return address
+        case _:
+            return response.status_code
 
 def address_list_constituent_get(
     constituent_id: str, apptokens: AppTokens
