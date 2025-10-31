@@ -3,7 +3,7 @@ from enum import StrEnum
 from pydantic import BaseModel
 from requests import Response, request
 
-from .auth import BB_API_SUBSCRIPTION_KEY, AppTokens, request_token
+from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 
 
 class HttpMethods(StrEnum):
@@ -23,11 +23,9 @@ class FuzzyDate(BaseModel):
     y: int | None = None
 
 
-def generic_request(
-    method: HttpMethods, url: str, apptokens: AppTokens, json=None, **kwargs
-) -> Response:
+def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Response:
     headers = {
-        "authorization": f"Bearer {apptokens.access_token}",
+        "authorization": f"Bearer {get_auth_token().access_token}",
         "Bb-Api-Subscription-Key": BB_API_SUBSCRIPTION_KEY,
         "Content-Type": "application/json",
     }
@@ -40,8 +38,7 @@ def generic_request(
         )
     response = reify(x=headers)
     if response.status_code == 403:
-        fresh_tokens = request_token(input=apptokens)
-        headers["authorization"] = f"Bearer {fresh_tokens.access_token}"
+        headers["authorization"] = f"Bearer {get_auth_token().access_token}"
         return reify(x=headers)
     else:
         return response

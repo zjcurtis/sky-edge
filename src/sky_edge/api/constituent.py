@@ -3,7 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from ..auth import AppTokens
 from ..util import FuzzyDate, HttpMethods, generic_request
 
 
@@ -76,12 +75,11 @@ class CollectionOfPhones(Collection):
     value: List[Phone]
 
 
-def address_post(address: Address, apptokens: AppTokens) -> Address | int:
+def address_post(address: Address) -> Address | int:
     response = generic_request(
         method=HttpMethods.POST,
         url="https://api.sky.blackbaud.com/constituent/v1/addresses",
         data=address.model_dump_json(exclude_none=True),
-        apptokens=apptokens,
     )
     match response.status_code:
         case 200:
@@ -92,16 +90,15 @@ def address_post(address: Address, apptokens: AppTokens) -> Address | int:
             return response.status_code
 
 
-def address_delete(address: Address, apptokens: AppTokens) -> int:
+def address_delete(address: Address) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/addresses/{address.id}",
-        apptokens=apptokens,
     ).status_code
 
 
 def address_list_constituent_get(
-    constituent_id: str, apptokens: AppTokens, include_inactive: bool = False
+    constituent_id: str, include_inactive: bool = False
 ) -> CollectionOfAddresses | int:
     url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses"
     if include_inactive:
@@ -110,7 +107,6 @@ def address_list_constituent_get(
     response = generic_request(
         method=HttpMethods.GET,
         url=url,
-        apptokens=apptokens,
     )
     match response.status_code:
         case 200:
@@ -119,11 +115,10 @@ def address_list_constituent_get(
             return response.status_code
 
 
-def email_list_all_get(apptokens: AppTokens, **kwargs) -> CollectionOfEmails | int:
+def email_list_all_get(**kwargs) -> CollectionOfEmails | int:
     response = generic_request(
         method=HttpMethods.GET,
         url="https://api.sky.blackbaud.com/constituent/v1/emailaddresses",
-        apptokens=apptokens,
         **kwargs,
     )
     match response.status_code:
@@ -133,13 +128,10 @@ def email_list_all_get(apptokens: AppTokens, **kwargs) -> CollectionOfEmails | i
             return response.status_code
 
 
-def email_list_constituent_get(
-    constituent_id: str, apptokens: AppTokens
-) -> CollectionOfEmails | int:
+def email_list_constituent_get(constituent_id: str) -> CollectionOfEmails | int:
     response = generic_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses",
-        apptokens=apptokens,
     )
     match response.status_code:
         case 200:
@@ -148,21 +140,17 @@ def email_list_constituent_get(
             return response.status_code
 
 
-def email_delete(email: Email, apptokens: AppTokens) -> int:
+def email_delete(email: Email) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/emailaddresses/{email.id}",
-        apptokens=apptokens,
     ).status_code
 
 
-def phone_list_constituent_get(
-    constituent_id: str, apptokens: AppTokens
-) -> CollectionOfPhones | int:
+def phone_list_constituent_get(constituent_id: str) -> CollectionOfPhones | int:
     response = generic_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/phones",
-        apptokens=apptokens,
     )
     match response.status_code:
         case 200:
@@ -171,9 +159,8 @@ def phone_list_constituent_get(
             return response.status_code
 
 
-def phone_delete(phone: Phone, apptokens: AppTokens) -> int:
+def phone_delete(phone: Phone) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
-        apptokens=apptokens,
     ).status_code
