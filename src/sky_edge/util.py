@@ -1,10 +1,11 @@
 from enum import StrEnum
 
 from pydantic import BaseModel
-from requests import Response, request
+from requests import Response, request, Session
 
 from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 
+_session = Session()
 
 class HttpMethods(StrEnum):
     GET = "GET"
@@ -31,9 +32,9 @@ def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Respo
     }
     reify = None
     if json == None:
-        reify = lambda x: request(method=method, url=url, headers=x, **kwargs)
+        reify = lambda x: _session.request(method=method, url=url, headers=x, **kwargs)
     else:
-        reify = lambda x: request(
+        reify = lambda x: _session.request(
             method=method, url=url, headers=x, json=json, **kwargs
         )
     response = reify(x=headers)
