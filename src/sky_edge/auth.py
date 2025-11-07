@@ -5,6 +5,7 @@ import webbrowser
 from base64 import b64encode
 from dataclasses import dataclass
 from os import getenv
+from typing import NoReturn
 
 import requests
 from dotenv import load_dotenv
@@ -15,7 +16,6 @@ load_dotenv()
 PORT = 13631
 REDIRECT_URI = f"http://localhost:{PORT}/callback"
 
-# TODO these should be loaded from a .env
 CLIENT_ID = getenv(key="CLIENT_ID")
 APPLICATION_SECRET = getenv(key="APPLICATION_SECRET")
 BB_API_SUBSCRIPTION_KEY = getenv(key="BB_API_SUBSCRIPTION_KEY")
@@ -44,6 +44,10 @@ class AppTokens:
 
     def refresh_expired(self) -> bool:
         return self.refresh_token_expires_in + self.granted_at < time.time()
+
+
+_auth_token: AppTokens | None = None
+_initialized = False
 
 
 def get_token(q: multiprocessing.Queue) -> None:
@@ -78,7 +82,8 @@ def request_authorization() -> str:
     return token
 
 
-def request_token(input: str | AppTokens) -> AppTokens:
+def request_token(input: str | AppTokens) -> None:
+    global _auth_token
     TOKEN_URL = "https://oauth2.sky.blackbaud.com/token"
     body = {}
     headers = {}
@@ -104,4 +109,22 @@ def request_token(input: str | AppTokens) -> AppTokens:
                 "Content-Type": "application/x-www-form-urlencoded",
             }
     response = requests.post(url=TOKEN_URL, data=body, headers=headers).json()
-    return AppTokens(**response)
+    _auth_token = AppTokens(**response)
+
+
+def get_auth_token() -> AppTokens:
+    global _auth_token, _initialized
+
+    if not _initialized:
+        request_token(input=request_authorization())
+        _initialized = True
+        if _auth_token:
+            return _auth_token
+        raise ValueError(f"Auth Token Process Failure {_auth_token}")
+    else:
+        if isinstance(_auth_token, AppTokens):
+            if _auth_token.access_expired():
+                request_token(_auth_token)
+            if _auth_token:
+                return _auth_token
+        raise ValueError(f"Auth Token Process Failure {_auth_token}")
