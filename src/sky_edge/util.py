@@ -1,11 +1,12 @@
 from enum import StrEnum
 
 from pydantic import BaseModel
-from requests import Response, request, Session
+from requests import Response, Session, request
 
 from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 
 _session = Session()
+
 
 class HttpMethods(StrEnum):
     GET = "GET"

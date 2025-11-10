@@ -58,6 +58,13 @@ class Email(BaseModel):
     type: str
 
 
+class Alias(BaseModel):
+    id: str | None = None
+    constituent_id: str
+    name: str
+    type: str | None = None
+
+
 class Collection(BaseModel):
     count: int
     next_link: Optional[str] = None
@@ -73,6 +80,14 @@ class CollectionOfEmails(Collection):
 
 class CollectionOfPhones(Collection):
     value: List[Phone]
+
+
+class CollectionOfAliases(Collection):
+    value: List[Alias]
+
+
+class CollectionOfStrings(Collection):
+    value: List[str]
 
 
 def address_post(address: Address) -> Address | int:
@@ -163,4 +178,50 @@ def phone_delete(phone: Phone) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
+    ).status_code
+
+
+def alias_list_constituent_get(
+    constituent_id: str, include_inactive: bool = False
+) -> CollectionOfAliases | int:
+    url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/aliases"
+    if include_inactive:
+        url = f"{url}?include_inactive=true"
+
+    response = generic_request(
+        method=HttpMethods.GET,
+        url=url,
+    )
+    match response.status_code:
+        case 200:
+            return CollectionOfAliases.model_validate_json(json_data=response.text)
+        case _:
+            return response.status_code
+
+
+def alias_collection_post(aliases: CollectionOfAliases) -> CollectionOfStrings | int:
+    response = generic_request(
+        method=HttpMethods.POST,
+        url="https://api.sky.blackbaud.com/constituent/v1/aliases",
+        data=aliases.model_dump_json(exclude_none=True),
+    )
+    match response.status_code:
+        case 200:
+            return CollectionOfStrings.model_validate_json(json_data=response.text)
+        case _:
+            return response.status_code
+
+
+def alias_patch(alias: Alias) -> int:
+    return generic_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
+        data=alias.model_dump_json(exclude_none=True, exclude={"id", "constituent_id"}),
+    ).status_code
+
+
+def alias_delete(alias: Alias) -> int:
+    return generic_request(
+        method=HttpMethods.DELETE,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
     ).status_code
