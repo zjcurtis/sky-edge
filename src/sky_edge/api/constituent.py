@@ -61,7 +61,7 @@ class Email(BaseModel):
 class Alias(BaseModel):
     id: str | None = None
     constituent_id: str
-    name: str
+    name: str | None = None
     type: str | None = None
 
 
