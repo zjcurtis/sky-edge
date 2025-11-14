@@ -34,6 +34,54 @@ class Address(BaseModel):
     dpc: str | None = None
 
 
+class Constituent(BaseModel):
+    id: str | None = None
+    address: Address | None = None
+    age: int | None = None
+    birthdate: FuzzyDate | None = None
+    date_added: datetime | None = None
+    date_modified: datetime | None = None
+    deceased: bool | None = None
+    deceased_date: FuzzyDate | None = None
+    first: str | None = None
+    former_name: str | None = None
+    gender: str | None = None
+    gives_anonymously: bool | None = None
+    inactive: bool | None = None
+    last: str | None = None
+    lookup_id: str | None = None
+    marital_status: str | None = None
+    middle: str | None = None
+    name: str | None = None
+    preferred_name: str | None = None
+    suffix: str | None = None
+    suffix_2: str | None = None
+    title: str | None = None
+    title_2: str | None = None
+    birthplace: str | None = None
+    ethnicity: str | None = None
+    income: str | None = None
+    religion: str | None = None
+    industry: str | None = None
+    matches_gifts: bool | None = None
+    matching_gift_per_gift_min: str | None = None
+    matching_gift_per_gift_max: str | None = None
+    matching_gift_total_min: str | None = None
+    matching_gift_total_max: str | None = None
+    matching_gift_factor: float | None = None
+    matching_gift_notes: str | None = None
+    num_employees: int | None = None
+    is_memorial: bool | None = None
+    is_solicitor: bool | None = None
+    no_valid_address: bool | None = None
+    receipt_type: str | None = None
+    target: str | None = None
+    requests_no_email: bool | None = None
+    num_subsidiaries: int | None = None
+    parent_corporation_id: int | None = None
+    parent_corporation_name: str | None = None
+
+
 class Phone(BaseModel):
     id: str
     constituent_id: str
@@ -129,6 +177,28 @@ def address_list_constituent_get(
         case _:
             return response.status_code
 
+def constituent_get(
+    constituent_id: str
+) -> Constituent | int:
+    url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}"
+
+    response = generic_request(
+        method=HttpMethods.GET,
+        url=url,
+    )
+    match response.status_code:
+        case 200:
+            return Constituent.model_validate_json(json_data=response.text)
+        case _:
+            return response
+
+def constituent_patch(constituent: Constituent):
+    return generic_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}",
+        data=constituent.model_dump_json(exclude_none=True),
+    ).status_code
+    
 
 def email_list_all_get(**kwargs) -> CollectionOfEmails | int:
     response = generic_request(
