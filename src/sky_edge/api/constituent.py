@@ -82,6 +82,30 @@ class Constituent(BaseModel):
     parent_corporation_name: str | None = None
 
 
+class Relationship(BaseModel):
+    id: str | None = None
+    comment: str | None = None
+    constituent_id: str
+    date_added: datetime | None = None
+    date_modified: datetime | None = None
+    end: FuzzyDate | None = None
+    is_organization_contact: bool | None = None
+    is_primary_business: bool | None = None
+    is_spouse: bool | None = None
+    is_spouse_head_of_household: bool | None = None
+    is_constituent_head_of_household: bool | None = None
+    name: str | None = None
+    organization_contact_type: str | None = None
+    position: str | None = None
+    reciprocal_relationship_id: str | None = None
+    reciprocal_type: str | None = None
+    relation_id: str | None = None
+    start: FuzzyDate | None = None
+    type: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+
+
 class Phone(BaseModel):
     id: str
     constituent_id: str
@@ -120,6 +144,10 @@ class Collection(BaseModel):
 
 class CollectionOfAddresses(Collection):
     value: List[Address]
+
+
+class CollectionOfRelationships(Collection):
+    value: List[Relationship]
 
 
 class CollectionOfEmails(Collection):
@@ -177,9 +205,8 @@ def address_list_constituent_get(
         case _:
             return response.status_code
 
-def constituent_get(
-    constituent_id: str
-) -> Constituent | int:
+
+def constituent_get(constituent_id: str) -> Constituent | int:
     url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}"
 
     response = generic_request(
@@ -192,13 +219,14 @@ def constituent_get(
         case _:
             return response
 
+
 def constituent_patch(constituent: Constituent):
     return generic_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}",
         data=constituent.model_dump_json(exclude_none=True),
     ).status_code
-    
+
 
 def email_list_all_get(**kwargs) -> CollectionOfEmails | int:
     response = generic_request(
@@ -294,4 +322,26 @@ def alias_delete(alias: Alias) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
+    ).status_code
+
+
+def relationship_list_constituent_get(
+    constituent_id: str,
+) -> CollectionOfRelationships | int:
+    response = generic_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/relationships",
+    )
+    match response.status_code:
+        case 200:
+            return CollectionOfRelationships.model_validate_json(json_data=response.text)
+        case _:
+            return response.status_code
+
+
+def relationship_patch(relationship: Relationship) -> int:
+    return generic_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
+        data=relationship.model_dump_json(exclude_none=True, exclude={"id", "constituent_id"}),
     ).status_code
