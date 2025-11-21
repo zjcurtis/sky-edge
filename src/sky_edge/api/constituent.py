@@ -345,3 +345,9 @@ def relationship_patch(relationship: Relationship) -> int:
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
         data=relationship.model_dump_json(exclude_none=True, exclude={"id", "constituent_id"}),
     ).status_code
+
+def relationship_delete(relationship: Relationship) -> int:
+    return generic_request(
+        method=HttpMethods.DELETE,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}"
+    ).status_code
