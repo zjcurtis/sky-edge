@@ -136,6 +136,14 @@ class Alias(BaseModel):
     name: str | None = None
     type: str | None = None
 
+class Note(BaseModel):
+    constituent_id: str
+    date: FuzzyDate | None = None
+    summary: str | None = None
+    text: str | None = None
+    type: str | None = None
+    author: str | None = None
+
 
 class Collection(BaseModel):
     count: int
@@ -164,6 +172,9 @@ class CollectionOfAliases(Collection):
 
 class CollectionOfStrings(Collection):
     value: List[str]
+
+class CollectionOfNotes(Collection):
+    value: List[Note]
 
 
 def address_post(address: Address) -> Address | int:
@@ -217,7 +228,7 @@ def constituent_get(constituent_id: str) -> Constituent | int:
         case 200:
             return Constituent.model_validate_json(json_data=response.text)
         case _:
-            return response
+            return response.status_code
 
 
 def constituent_patch(constituent: Constituent):
@@ -351,3 +362,16 @@ def relationship_delete(relationship: Relationship) -> int:
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}"
     ).status_code
+
+def note_list_constituent_get(
+    constituent_id: str,
+) -> CollectionOfNotes | int:
+    response = generic_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/notes",
+    )
+    match response.status_code:
+        case 200:
+            return CollectionOfNotes.model_validate_json(json_data=response.text)
+        case _:
+            return response.status_code
