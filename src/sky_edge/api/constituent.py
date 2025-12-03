@@ -364,6 +364,21 @@ def relationship_delete(relationship: Relationship) -> int:
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}"
     ).status_code
 
+def note_post(note: Note) -> Note | int:
+    response = generic_request(
+        method=HttpMethods.POST,
+        url="https://api.sky.blackbaud.com/constituent/v1/addresses",
+        data=note.model_dump_json(exclude_none=True),
+    )
+    match response.status_code:
+        case 200:
+            if response.json()["id"]:
+                note.id = response.json()["id"]
+            return note
+        case _:
+            return response.status_code
+
+
 def note_list_constituent_get(
     constituent_id: str,
 ) -> CollectionOfNotes | int:
