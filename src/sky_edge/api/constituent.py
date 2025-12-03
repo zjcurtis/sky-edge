@@ -137,7 +137,8 @@ class Alias(BaseModel):
     type: str | None = None
 
 class Note(BaseModel):
-    constituent_id: str
+    id: str | None = None
+    constituent_id: str | None = None
     date: FuzzyDate | None = None
     summary: str | None = None
     text: str | None = None
