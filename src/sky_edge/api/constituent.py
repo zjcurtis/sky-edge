@@ -137,6 +137,7 @@ class Alias(BaseModel):
     name: str | None = None
     type: str | None = None
 
+
 class Note(BaseModel):
     id: str | None = None
     constituent_id: str | None = None
@@ -146,18 +147,20 @@ class Note(BaseModel):
     type: str | None = None
     author: str | None = None
 
+
 T = TypeVar("T")
 
-class Collection(BaseModel,Generic[T]):
+
+class Collection(BaseModel, Generic[T]):
     count: int
     next_link: Optional[str] = None
     value: List[T]
 
-    def fetch_next(self) -> Optional['Collection[T]'] | Response:
+    def fetch_next(self) -> Optional["Collection[T]"] | Response:
         if not self.next_link:
             return None
         else:
-            response = generic_request(method=HttpMethods.GET,url=self.next_link)
+            response = generic_request(method=HttpMethods.GET, url=self.next_link)
             if response.status_code == 200:
                 return self.__class__.model_validate_json(json_data=response.text)
             else:
@@ -167,12 +170,14 @@ class Collection(BaseModel,Generic[T]):
 class CollectionOfAddresses(Collection[Address]):
     pass
 
+
 class CollectionOfRelationships(Collection[Relationship]):
     pass
 
 
 class CollectionOfEmails(Collection[Email]):
     pass
+
 
 class CollectionOfPhones(Collection[Phone]):
     pass
@@ -184,6 +189,7 @@ class CollectionOfAliases(Collection[Alias]):
 
 class CollectionOfStrings(Collection[str]):
     pass
+
 
 class CollectionOfNotes(Collection[Note]):
     pass
@@ -357,7 +363,9 @@ def relationship_list_constituent_get(
     )
     match response.status_code:
         case 200:
-            return CollectionOfRelationships.model_validate_json(json_data=response.text)
+            return CollectionOfRelationships.model_validate_json(
+                json_data=response.text
+            )
         case _:
             return response.status_code
 
@@ -366,14 +374,18 @@ def relationship_patch(relationship: Relationship) -> int:
     return generic_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
-        data=relationship.model_dump_json(exclude_none=True, exclude={"id", "constituent_id"}),
+        data=relationship.model_dump_json(
+            exclude_none=True, exclude={"id", "constituent_id"}
+        ),
     ).status_code
+
 
 def relationship_delete(relationship: Relationship) -> int:
     return generic_request(
         method=HttpMethods.DELETE,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}"
+        url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
     ).status_code
+
 
 def note_post(note: Note) -> Note | int:
     response = generic_request(
