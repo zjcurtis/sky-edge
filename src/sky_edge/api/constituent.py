@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import List, Optional, TypeVar, Generic
+from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel
 from requests import Response
 
-from ..util import FuzzyDate, HttpMethods, generic_request
+from ..util import FuzzyDate, HttpMethods, api_request
 
 
 class Address(BaseModel):
@@ -160,11 +160,9 @@ class Collection(BaseModel, Generic[T]):
         if not self.next_link:
             return None
         else:
-            response = generic_request(method=HttpMethods.GET, url=self.next_link)
-            if response.status_code == 200:
-                return self.__class__.model_validate_json(json_data=response.text)
-            else:
-                return response
+            return api_request(
+                method=HttpMethods.GET, url=self.next_link, response_model=Collection[T]
+            )
 
 
 class CollectionOfAddresses(Collection[Address]):
@@ -195,8 +193,8 @@ class CollectionOfNotes(Collection[Note]):
     pass
 
 
-def address_post(address: Address) -> Address | int:
-    response = generic_request(
+def address_post(address: Address) -> Address | Response:
+    response = api_request(
         method=HttpMethods.POST,
         url="https://api.sky.blackbaud.com/constituent/v1/addresses",
         data=address.model_dump_json(exclude_none=True),
@@ -207,188 +205,150 @@ def address_post(address: Address) -> Address | int:
                 address.id = response.json()["id"]
             return address
         case _:
-            return response.status_code
+            return response
 
 
-def address_delete(address: Address) -> int:
-    return generic_request(
+def address_delete(address: Address) -> Response:
+    return api_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/addresses/{address.id}",
-    ).status_code
+    )
 
 
 def address_list_constituent_get(
     constituent_id: str, include_inactive: bool = False
-) -> CollectionOfAddresses | int:
+) -> CollectionOfAddresses | Response:
     url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/addresses"
     if include_inactive:
         url = f"{url}?include_inactive=true"
 
-    response = generic_request(
-        method=HttpMethods.GET,
-        url=url,
+    return api_request(
+        method=HttpMethods.GET, url=url, response_model=CollectionOfAddresses
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfAddresses.model_validate_json(json_data=response.text)
-        case _:
-            return response.status_code
 
 
-def constituent_get(constituent_id: str) -> Constituent | int:
-    url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}"
-
-    response = generic_request(
+def constituent_get(constituent_id: str) -> Constituent | Response:
+    return api_request(
         method=HttpMethods.GET,
-        url=url,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}",
+        response_model=Constituent,
     )
-    match response.status_code:
-        case 200:
-            return Constituent.model_validate_json(json_data=response.text)
-        case _:
-            return response.status_code
 
 
-def constituent_patch(constituent: Constituent):
-    return generic_request(
+def constituent_patch(constituent: Constituent) -> Response:
+    return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}",
         data=constituent.model_dump_json(exclude_none=True),
-    ).status_code
+    )
 
 
-def email_list_all_get(**kwargs) -> CollectionOfEmails | int:
-    response = generic_request(
+def email_list_all_get(**kwargs) -> CollectionOfEmails | Response:
+    return api_request(
         method=HttpMethods.GET,
         url="https://api.sky.blackbaud.com/constituent/v1/emailaddresses",
+        response_model=CollectionOfEmails,
         **kwargs,
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfEmails(**response.json())
-        case _:
-            return response.status_code
 
 
-def email_list_constituent_get(constituent_id: str) -> CollectionOfEmails | int:
-    response = generic_request(
+def email_list_constituent_get(constituent_id: str) -> CollectionOfEmails | Response:
+    return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses",
+        response_model=CollectionOfEmails,
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfEmails.model_validate_json(json_data=response.text)
-        case _:
-            return response.status_code
 
 
-def email_delete(email: Email) -> int:
-    return generic_request(
+def email_delete(email: Email) -> Response:
+    return api_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/emailaddresses/{email.id}",
-    ).status_code
+    )
 
 
-def phone_list_constituent_get(constituent_id: str) -> CollectionOfPhones | int:
-    response = generic_request(
+def phone_list_constituent_get(constituent_id: str) -> CollectionOfPhones | Response:
+    return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/phones",
+        response_model=CollectionOfPhones,
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfPhones(**response.json())
-        case _:
-            return response.status_code
 
 
-def phone_delete(phone: Phone) -> int:
-    return generic_request(
+def phone_delete(phone: Phone) -> Response:
+    return api_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
-    ).status_code
+    )
 
 
 def alias_list_constituent_get(
     constituent_id: str, include_inactive: bool = False
-) -> CollectionOfAliases | int:
+) -> CollectionOfAliases | Response:
     url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/aliases"
     if include_inactive:
         url = f"{url}?include_inactive=true"
 
-    response = generic_request(
-        method=HttpMethods.GET,
-        url=url,
+    return api_request(
+        method=HttpMethods.GET, url=url, response_model=CollectionOfAliases
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfAliases.model_validate_json(json_data=response.text)
-        case _:
-            return response.status_code
 
 
-def alias_collection_post(aliases: CollectionOfAliases) -> CollectionOfStrings | int:
-    response = generic_request(
+def alias_collection_post(
+    aliases: CollectionOfAliases,
+) -> CollectionOfStrings | Response:
+    return api_request(
         method=HttpMethods.POST,
         url="https://api.sky.blackbaud.com/constituent/v1/aliases",
+        response_model=CollectionOfStrings,
         data=aliases.model_dump_json(exclude_none=True),
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfStrings.model_validate_json(json_data=response.text)
-        case _:
-            return response.status_code
 
 
-def alias_patch(alias: Alias) -> int:
-    return generic_request(
+def alias_patch(alias: Alias) -> Response:
+    return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
         data=alias.model_dump_json(exclude_none=True, exclude={"id", "constituent_id"}),
-    ).status_code
+    )
 
 
-def alias_delete(alias: Alias) -> int:
-    return generic_request(
+def alias_delete(alias: Alias) -> Response:
+    return api_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
-    ).status_code
+    )
 
 
 def relationship_list_constituent_get(
     constituent_id: str,
-) -> CollectionOfRelationships | int:
-    response = generic_request(
+) -> CollectionOfRelationships | Response:
+    return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/relationships",
+        response_model=CollectionOfRelationships,
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfRelationships.model_validate_json(
-                json_data=response.text
-            )
-        case _:
-            return response.status_code
 
 
-def relationship_patch(relationship: Relationship) -> int:
-    return generic_request(
+def relationship_patch(relationship: Relationship) -> Response:
+    return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
         data=relationship.model_dump_json(
             exclude_none=True, exclude={"id", "constituent_id"}
         ),
-    ).status_code
+    )
 
 
-def relationship_delete(relationship: Relationship) -> int:
-    return generic_request(
+def relationship_delete(relationship: Relationship) -> Response:
+    return api_request(
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
-    ).status_code
+    )
 
 
-def note_post(note: Note) -> Note | int:
-    response = generic_request(
+def note_post(note: Note) -> Note | Response:
+    response = api_request(
         method=HttpMethods.POST,
         url="https://api.sky.blackbaud.com/constituent/v1/addresses",
         data=note.model_dump_json(exclude_none=True),
@@ -399,18 +359,14 @@ def note_post(note: Note) -> Note | int:
                 note.id = response.json()["id"]
             return note
         case _:
-            return response.status_code
+            return response
 
 
 def note_list_constituent_get(
     constituent_id: str,
-) -> CollectionOfNotes | int:
-    response = generic_request(
+) -> CollectionOfNotes | Response:
+    return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/notes",
+        response_model=CollectionOfNotes,
     )
-    match response.status_code:
-        case 200:
-            return CollectionOfNotes.model_validate_json(json_data=response.text)
-        case _:
-            return response.status_code
