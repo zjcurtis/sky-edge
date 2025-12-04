@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, TypeVar, Generic
 
 from pydantic import BaseModel
+from requests import Response
 
 from ..util import FuzzyDate, HttpMethods, generic_request
 
@@ -145,37 +146,47 @@ class Note(BaseModel):
     type: str | None = None
     author: str | None = None
 
+T = TypeVar("T")
 
-class Collection(BaseModel):
+class Collection(BaseModel,Generic[T]):
     count: int
     next_link: Optional[str] = None
+    value: List[T]
+
+    def fetch_next(self) -> Optional['Collection[T]'] | Response:
+        if not self.next_link:
+            return None
+        else:
+            response = generic_request(method=HttpMethods.GET,url=self.next_link)
+            if response.status_code == 200:
+                return self.__class__.model_validate_json(json_data=response.text)
+            else:
+                return response
 
 
-class CollectionOfAddresses(Collection):
-    value: List[Address]
+class CollectionOfAddresses(Collection[Address]):
+    pass
+
+class CollectionOfRelationships(Collection[Relationship]):
+    pass
 
 
-class CollectionOfRelationships(Collection):
-    value: List[Relationship]
+class CollectionOfEmails(Collection[Email]):
+    pass
+
+class CollectionOfPhones(Collection[Phone]):
+    pass
 
 
-class CollectionOfEmails(Collection):
-    value: List[Email]
+class CollectionOfAliases(Collection[Alias]):
+    pass
 
 
-class CollectionOfPhones(Collection):
-    value: List[Phone]
+class CollectionOfStrings(Collection[str]):
+    pass
 
-
-class CollectionOfAliases(Collection):
-    value: List[Alias]
-
-
-class CollectionOfStrings(Collection):
-    value: List[str]
-
-class CollectionOfNotes(Collection):
-    value: List[Note]
+class CollectionOfNotes(Collection[Note]):
+    pass
 
 
 def address_post(address: Address) -> Address | int:
