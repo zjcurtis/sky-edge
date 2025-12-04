@@ -71,7 +71,7 @@ def api_request(
 ) -> T | Response:
     response = generic_request(method=method, url=url, **kwargs)
     if response.status_code and response_model:
-        assert isinstance(response_model, BaseModel)
+        assert issubclass(response_model, BaseModel)
         return response_model.model_validate_json(json_data=response.text)
 
     return response

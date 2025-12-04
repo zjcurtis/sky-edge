@@ -83,6 +83,21 @@ class Constituent(BaseModel):
     parent_corporation_name: str | None = None
 
 
+class ConstituentSearchResult(BaseModel):
+    id: str
+    address: str | None = None
+    deceased: bool = False
+    email: str | None = None
+    fundraiser_status: str | None = None
+    inactive: bool = False
+    lookup_id: str | None = None
+    name: str | None = None
+    number_of_subsidiaries: int | None = None
+
+    def to_constituent(self) -> Constituent:
+        return Constituent(id=self.id, name=self.name)
+
+
 class Relationship(BaseModel):
     id: str | None = None
     comment: str | None = None
@@ -169,6 +184,10 @@ class CollectionOfAddresses(Collection[Address]):
     pass
 
 
+class CollectionOfConstituentSearchResults(Collection[ConstituentSearchResult]):
+    pass
+
+
 class CollectionOfRelationships(Collection[Relationship]):
     pass
 
@@ -230,8 +249,36 @@ def address_list_constituent_get(
 def constituent_get(constituent_id: str) -> Constituent | Response:
     return api_request(
         method=HttpMethods.GET,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/",
         response_model=Constituent,
+    )
+
+
+def constituent_search_get(
+    search_text: str,
+    fundraiser_status: list[str] | None = None,
+    include_inactive: bool = False,
+    search_field: str | None = None,
+    strict_search: bool = False,
+    include_non_constituents: bool = False,
+    limit: int = 500,
+    offset: int | None = None
+) -> CollectionOfConstituentSearchResults | Response:
+    params = {
+        "search_text": search_text,
+        "fundraiser_status": fundraiser_status,
+        "include_inactive": include_inactive,
+        "search_field": search_field,
+        "strict_search": strict_search,
+        "include_non_constituents": include_non_constituents,
+        "limit": limit,
+        "offset": offset
+    }
+    return api_request(
+        method=HttpMethods.GET,
+        url="https://api.sky.blackbaud.com/constituent/v1/constituents/search",
+        response_model=CollectionOfConstituentSearchResults,
+        params=params,
     )
 
 
