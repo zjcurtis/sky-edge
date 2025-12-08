@@ -225,6 +225,13 @@ def address_post(address: Address) -> Address | Response:
             return address
         case _:
             return response
+        
+def address_patch(address: Address) -> Response:
+    return api_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{address.id}",
+        data=address.model_dump_json(exclude_none=True),
+    )
 
 
 def address_delete(address: Address) -> Response:
