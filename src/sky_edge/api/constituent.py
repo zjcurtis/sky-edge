@@ -249,7 +249,7 @@ def address_list_constituent_get(
 def constituent_get(constituent_id: str) -> Constituent | Response:
     return api_request(
         method=HttpMethods.GET,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}",
         response_model=Constituent,
     )
 
