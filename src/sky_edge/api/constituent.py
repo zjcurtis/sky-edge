@@ -229,7 +229,7 @@ def address_post(address: Address) -> Address | Response:
 def address_patch(address: Address) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{address.id}",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/addresses/{address.id}",
         data=address.model_dump_json(exclude_none=True),
     )
 
