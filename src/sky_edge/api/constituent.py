@@ -163,6 +163,15 @@ class Note(BaseModel):
     author: str | None = None
 
 
+class NameFormat(BaseModel):
+    id: str | None = None
+    configuration_id: str | None = None
+    constituent_id: str | None = None
+    custom_format: bool | None = None
+    formatted_name: str | None = None
+    type: str | None = None
+
+
 T = TypeVar("T")
 
 
@@ -225,7 +234,8 @@ def address_post(address: Address) -> Address | Response:
             return address
         case _:
             return response
-        
+
+
 def address_patch(address: Address) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
@@ -269,7 +279,7 @@ def constituent_search_get(
     strict_search: bool = False,
     include_non_constituents: bool = False,
     limit: int = 500,
-    offset: int | None = None
+    offset: int | None = None,
 ) -> CollectionOfConstituentSearchResults | Response:
     params = {
         "search_text": search_text,
@@ -279,7 +289,7 @@ def constituent_search_get(
         "strict_search": strict_search,
         "include_non_constituents": include_non_constituents,
         "limit": limit,
-        "offset": offset
+        "offset": offset,
     }
     return api_request(
         method=HttpMethods.GET,
@@ -423,4 +433,12 @@ def note_list_constituent_get(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/notes",
         response_model=CollectionOfNotes,
+    )
+
+
+def name_format_get(name_format_id: str) -> NameFormat | Response:
+    return api_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/nameformats/{name_format_id}",
+        response_model=NameFormat,
     )
