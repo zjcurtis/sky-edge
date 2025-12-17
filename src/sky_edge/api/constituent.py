@@ -83,6 +83,18 @@ class Constituent(BaseModel):
     parent_corporation_name: str | None = None
 
 
+class ConstituentSearchQuery(BaseModel):
+    search_text: str
+    fundraiser_status: list[str] | None = None
+    include_inactive: bool | None = None
+    search_field: str | None = None
+    strict_search: bool | None = None
+    include_non_constituents: bool | None = None
+    limit: Union[Annotated[int, Field(ge=1, le=5000)], None] = None
+    offset: int | None = None
+
+
+
 class ConstituentSearchResult(BaseModel):
     id: str
     address: str | None = None
@@ -288,30 +300,13 @@ def constituent_list_get(
 
 
 def constituent_search_get(
-    search_text: str,
-    fundraiser_status: list[str] | None = None,
-    include_inactive: bool = False,
-    search_field: str | None = None,
-    strict_search: bool = False,
-    include_non_constituents: bool = False,
-    limit: int = 500,
-    offset: int | None = None,
+    query: ConstituentSearchQuery
 ) -> CollectionOfConstituentSearchResults | Response:
-    params = {
-        "search_text": search_text,
-        "fundraiser_status": fundraiser_status,
-        "include_inactive": include_inactive,
-        "search_field": search_field,
-        "strict_search": strict_search,
-        "include_non_constituents": include_non_constituents,
-        "limit": limit,
-        "offset": offset,
-    }
     return api_request(
         method=HttpMethods.GET,
         url="https://api.sky.blackbaud.com/constituent/v1/constituents/search",
         response_model=CollectionOfConstituentSearchResults,
-        params=params,
+        params=query.model_dump(exclude_none=True),
     )
 
 
