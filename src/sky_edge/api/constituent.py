@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Annotated, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from requests import Response
 
 from ..util import Collection, FuzzyDate, HttpMethods, api_request
@@ -97,6 +98,24 @@ class ConstituentSearchResult(BaseModel):
         return Constituent(id=self.id, name=self.name)
 
 
+class ConstituentListQuery(BaseModel):
+    constituent_code: list[str] | None = None
+    constituent_id: list[str] | None = None
+    custom_field_category: list[str] | None = None
+    fields: list[str] | None = None
+    fundraiser_status: list[str] | None = None
+    include_deceased: bool | None = None
+    include_inactive: bool | None = None
+    list_id: str | None = None
+    postal_code: list[str] | None = None
+    date_added: datetime | None = None
+    last_modified: datetime | None = None
+    sort_token: str | None = None
+    sort: list[str] | None = None
+    limit: Union[Annotated[int, Field(ge=1, le=5000)], None] = None
+    offset: int | None = None
+
+
 class Relationship(BaseModel):
     id: str | None = None
     comment: str | None = None
@@ -175,6 +194,10 @@ class CollectionOfAddresses(Collection[Address]):
     pass
 
 
+class CollectionOfConstituents(Collection[Constituent]):
+    pass
+
+
 class CollectionOfConstituentSearchResults(Collection[ConstituentSearchResult]):
     pass
 
@@ -250,6 +273,17 @@ def constituent_get(constituent_id: str) -> Constituent | Response:
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}",
         response_model=Constituent,
+    )
+
+
+def constituent_list_get(
+    query: ConstituentListQuery,
+) -> CollectionOfConstituents | Response:
+    return api_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents",
+        params=query.model_dump(exclude_none=True),
+        response_model=CollectionOfConstituents,
     )
 
 
