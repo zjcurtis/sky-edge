@@ -1,15 +1,15 @@
 from enum import StrEnum
-from typing import Type, TypeVar
+from time import sleep
+from typing import Generic, List, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 from requests import Response, Session
-from time import sleep
 
 from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 
 _session = Session()
 
-T = TypeVar("T", bound=BaseModel | None)
+T = TypeVar("T", bound=BaseModel | str | None)
 
 
 class HttpMethods(StrEnum):
@@ -27,6 +27,20 @@ class FuzzyDate(BaseModel):
     d: int | None = None
     m: int | None = None
     y: int | None = None
+
+
+class Collection(BaseModel, Generic[T]):
+    count: int
+    next_link: Optional[str] = None
+    value: List[T]
+
+    def fetch_next(self) -> Optional["Collection[T]"] | Response:
+        if not self.next_link:
+            return None
+        else:
+            return api_request(
+                method=HttpMethods.GET, url=self.next_link, response_model=Collection[T]
+            )
 
 
 def reify_no_json(

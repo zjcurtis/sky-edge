@@ -1,10 +1,9 @@
 from datetime import datetime
-from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel
 from requests import Response
 
-from ..util import FuzzyDate, HttpMethods, api_request
+from ..util import Collection, FuzzyDate, HttpMethods, api_request
 
 
 class Address(BaseModel):
@@ -170,23 +169,6 @@ class NameFormat(BaseModel):
     custom_format: bool | None = None
     formatted_name: str | None = None
     type: str | None = None
-
-
-T = TypeVar("T")
-
-
-class Collection(BaseModel, Generic[T]):
-    count: int
-    next_link: Optional[str] = None
-    value: List[T]
-
-    def fetch_next(self) -> Optional["Collection[T]"] | Response:
-        if not self.next_link:
-            return None
-        else:
-            return api_request(
-                method=HttpMethods.GET, url=self.next_link, response_model=Collection[T]
-            )
 
 
 class CollectionOfAddresses(Collection[Address]):
