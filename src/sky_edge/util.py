@@ -70,7 +70,9 @@ def api_request(
     method: HttpMethods, url: str, response_model: Type[T] | None = None, **kwargs
 ) -> T | Response:
     response = generic_request(method=method, url=url, **kwargs)
-    if response.status_code and response_model:
+    if str(response.status_code)[0] == "4":
+        return response
+    elif response.status_code and response_model:
         assert issubclass(response_model, BaseModel)
         return response_model.model_validate_json(json_data=response.text)
 
