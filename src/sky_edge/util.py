@@ -3,6 +3,7 @@ from typing import Type, TypeVar
 
 from pydantic import BaseModel
 from requests import Response, Session
+from time import sleep
 
 from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 
@@ -43,27 +44,40 @@ def reify_with_json(
 
 
 def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Response:
-    headers = {
+    assert BB_API_SUBSCRIPTION_KEY
+    headers: dict[str, str] = {
         "authorization": f"Bearer {get_auth_token().access_token}",
         "Bb-Api-Subscription-Key": BB_API_SUBSCRIPTION_KEY,
         "Content-Type": "application/json",
     }
-    if json is None:
-        response = reify_no_json(method=method, url=url, headers=headers, **kwargs)
-    else:
-        response = reify_with_json(
-            method=method, url=url, headers=headers, json=json, **kwargs
-        )
-    if response.status_code == 403:
-        headers["authorization"] = f"Bearer {get_auth_token().access_token}"
-        if json is None:
-            return reify_no_json(method=method, url=url, headers=headers, **kwargs)
-        else:
-            return reify_with_json(
+    match json:
+        case None:
+            response = reify_no_json(method=method, url=url, headers=headers, **kwargs)
+        case _:
+            response = reify_with_json(
                 method=method, url=url, headers=headers, json=json, **kwargs
             )
-    else:
-        return response
+    match response.status_code:
+        case 403:
+            headers["authorization"] = f"Bearer {get_auth_token().access_token}"
+            if json is None:
+                return reify_no_json(method=method, url=url, headers=headers, **kwargs)
+            else:
+                return reify_with_json(
+                    method=method, url=url, headers=headers, json=json, **kwargs
+                )
+        case 429:
+            sleep_amount = float(response.headers["Retry-After"])
+            sleep(sleep_amount)
+            if json is None:
+                return reify_no_json(method=method, url=url, headers=headers, **kwargs)
+            else:
+                return reify_with_json(
+                    method=method, url=url, headers=headers, json=json, **kwargs
+                )
+
+        case _:
+            return response
 
 
 def api_request(
