@@ -42,7 +42,7 @@ class AttachmentType(StrEnum):
 
 
 class Attachment(BaseModel):
-    date: datetime | None = None
+    date: datetime = datetime.now()
     file_id: str | None = None
     file_name: str | None = None
     name: str | None = None
