@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import Annotated, Union
 
 from pydantic import BaseModel, Field
@@ -33,6 +34,23 @@ class Address(BaseModel):
     lot: str | None = None
     cart: str | None = None
     dpc: str | None = None
+
+
+class AttachmentType(StrEnum):
+    LINK = "Link"
+    PHYSICAL = "Physical"
+
+
+class Attachment(BaseModel):
+    date: datetime | None = None
+    file_id: str | None = None
+    file_name: str | None = None
+    name: str | None = None
+    parent_id: str
+    tags: list[str] | None = None
+    thumbnail_id: str | None = None
+    type: AttachmentType
+    url: str | None = None
 
 
 class Constituent(BaseModel):
@@ -161,6 +179,10 @@ class Phone(BaseModel):
     number: str
     primary: bool
     type: str
+
+
+class PostResponse(BaseModel):
+    id: str | None = None
 
 
 class Email(BaseModel):
@@ -299,6 +321,15 @@ def address_list_constituent_get(
 
     return api_request(
         method=HttpMethods.GET, url=url, response_model=CollectionOfAddresses
+    )
+
+
+def attachment_post(attachment: Attachment) -> PostResponse | Response:
+    return api_request(
+        method=HttpMethods.POST,
+        url="https://api.sky.blackbaud.com/constituent/v1/constituents/attachments",
+        data=attachment.model_dump_json(exclude_none=True),
+        response_model=PostResponse,
     )
 
 
