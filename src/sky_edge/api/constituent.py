@@ -94,7 +94,6 @@ class ConstituentSearchQuery(BaseModel):
     offset: int | None = None
 
 
-
 class ConstituentSearchResult(BaseModel):
     id: str
     address: str | None = None
@@ -202,6 +201,29 @@ class NameFormat(BaseModel):
     type: str | None = None
 
 
+class NewDocumentInfo(BaseModel):
+    file_name: str | None = None
+    upload_thumbnail: bool = False
+
+
+class Header(BaseModel):
+    name: str | None = None
+    value: str | None = None
+
+
+class RequestMetaData(BaseModel):
+    headers: list[Header] | None = None
+    method: str | None = None
+    url: str | None = None
+
+
+class FileDefinition(BaseModel):
+    file_id: str | None = None
+    file_upload_request: RequestMetaData | None = None
+    thumbnail_id: str | None = None
+    thumbnail_upload_request: RequestMetaData | None = None
+
+
 class CollectionOfAddresses(Collection[Address]):
     pass
 
@@ -293,14 +315,14 @@ def constituent_list_get(
 ) -> CollectionOfConstituents | Response:
     return api_request(
         method=HttpMethods.GET,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents",
+        url="https://api.sky.blackbaud.com/constituent/v1/constituents",
         params=query.model_dump(exclude_none=True),
         response_model=CollectionOfConstituents,
     )
 
 
 def constituent_search_get(
-    query: ConstituentSearchQuery
+    query: ConstituentSearchQuery,
 ) -> CollectionOfConstituentSearchResults | Response:
     return api_request(
         method=HttpMethods.GET,
@@ -318,6 +340,15 @@ def constituent_patch(constituent: Constituent) -> Response:
     )
 
 
+def document_post(request: NewDocumentInfo) -> FileDefinition | Response:
+    return api_request(
+        method=HttpMethods.POST,
+        url="https://api.sky.blackbaud.com/constituent/v1/documents",
+        data=request.model_dump_json(exclude_none=True),
+        response_model=FileDefinition,
+    )
+
+
 def email_list_all_get(**kwargs) -> CollectionOfEmails | Response:
     return api_request(
         method=HttpMethods.GET,
@@ -327,7 +358,9 @@ def email_list_all_get(**kwargs) -> CollectionOfEmails | Response:
     )
 
 
-def email_list_constituent_get(constituent_id: str) -> CollectionOfEmails | Response:
+def email_list_constituent_get(
+    constituent_id: str,
+) -> CollectionOfEmails | Response:
     return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses",
@@ -342,7 +375,9 @@ def email_delete(email: Email) -> Response:
     )
 
 
-def phone_list_constituent_get(constituent_id: str) -> CollectionOfPhones | Response:
+def phone_list_constituent_get(
+    constituent_id: str,
+) -> CollectionOfPhones | Response:
     return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/phones",
@@ -384,7 +419,9 @@ def alias_patch(alias: Alias) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
-        data=alias.model_dump_json(exclude_none=True, exclude={"id", "constituent_id"}),
+        data=alias.model_dump_json(
+            exclude_none=True, exclude={"id", "constituent_id"}
+        ),
     )
 
 
