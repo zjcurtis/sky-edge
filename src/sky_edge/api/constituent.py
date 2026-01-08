@@ -1,4 +1,3 @@
-from lib2to3.pytree import Base
 from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Union
