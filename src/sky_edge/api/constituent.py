@@ -1,3 +1,4 @@
+from lib2to3.pytree import Base
 from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Union
@@ -220,8 +221,26 @@ class NameFormat(BaseModel):
     constituent_id: str | None = None
     custom_format: bool | None = None
     formatted_name: str | None = None
+    primary_type: str | None = None
+
+class NameFormatEdit(BaseModel):
+    configuration_id: str | None = None
+    custom_format: bool | None = None
+    formatted_name: str | None = None
+    type: str
+
+class PrimaryNameFormat(BaseModel):
+    id: str | None = None
+    configuration_id: str | None = None
+    constituent_id: str | None = None
+    custom_format: bool | None = None
+    formatted_name: str | None = None
     type: str | None = None
 
+class NameFormatSummary(BaseModel):
+    additional_name_formats: list[NameFormat] | None = None
+    primary_addressee: PrimaryNameFormat | None = None
+    primary_salutation: PrimaryNameFormat | None = None
 
 class NewDocumentInfo(BaseModel):
     file_name: str | None = None
@@ -520,4 +539,18 @@ def name_format_get(name_format_id: str) -> NameFormat | Response:
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/nameformats/{name_format_id}",
         response_model=NameFormat,
+    )
+
+def name_format_patch(name_format_id: str, name: NameFormatEdit) -> Response :
+    return api_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/nameformats/{name_format_id}",
+        data=name.model_dump_json(exclude_none=True)
+    )
+
+def name_format_summary_get(constituent_id: str) -> NameFormatSummary | Response :
+    return api_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/nameformats/summary",
+        response_model=NameFormatSummary,
     )
