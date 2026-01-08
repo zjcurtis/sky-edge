@@ -235,6 +235,11 @@ class PrimaryNameFormat(BaseModel):
     custom_format: bool | None = None
     formatted_name: str | None = None
     type: str | None = None
+    
+class PrimaryNameFormatEdit(BaseModel):
+    configuration_id: str | None = None
+    custom_format: bool | None = None
+    formatted_name: str | None = None
 
 class NameFormatSummary(BaseModel):
     additional_name_formats: list[NameFormat] | None = None
@@ -544,6 +549,13 @@ def name_format_patch(name_format_id: str, name: NameFormatEdit) -> Response :
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/nameformats/{name_format_id}",
+        data=name.model_dump_json(exclude_none=True)
+    )
+
+def name_format_primary_patch(primary_name_format_id: str, name: PrimaryNameFormatEdit) -> Response :
+    return api_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/primarynameformats/{primary_name_format_id}",
         data=name.model_dump_json(exclude_none=True)
     )
 
