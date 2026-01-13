@@ -79,6 +79,8 @@ def generic_request(
 
     # Merge incoming headers if provided
     if incoming_headers is not None:
+        
+        headers = dict()
         if isinstance(incoming_headers, list):
             # Convert list of Header objects to dict
             for header in incoming_headers:
