@@ -58,40 +58,41 @@ def reify_with_json(
 
 
 def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Response:
-    assert BB_API_SUBSCRIPTION_KEY
-    headers: dict[str, str] = {
+    # Handle headers parameter - can be dict or list of Header objects
+    incoming_headers = kwargs.pop("headers", None)
+
+    # Start with default headers
+    headers = {
         "authorization": f"Bearer {get_auth_token().access_token}",
         "Bb-Api-Subscription-Key": BB_API_SUBSCRIPTION_KEY,
         "Content-Type": "application/json",
     }
-    match json:
-        case None:
-            response = reify_no_json(method=method, url=url, headers=headers, **kwargs)
-        case _:
-            response = reify_with_json(
-                method=method, url=url, headers=headers, json=json, **kwargs
-            )
-    match response.status_code:
-        case 403:
-            headers["authorization"] = f"Bearer {get_auth_token().access_token}"
-            if json is None:
-                return reify_no_json(method=method, url=url, headers=headers, **kwargs)
-            else:
-                return reify_with_json(
-                    method=method, url=url, headers=headers, json=json, **kwargs
-                )
-        case 429:
-            sleep_amount = float(response.headers["Retry-After"])
-            sleep(sleep_amount)
-            if json is None:
-                return reify_no_json(method=method, url=url, headers=headers, **kwargs)
-            else:
-                return reify_with_json(
-                    method=method, url=url, headers=headers, json=json, **kwargs
-                )
 
-        case _:
-            return response
+    # Merge incoming headers if provided
+    if incoming_headers is not None:
+        if isinstance(incoming_headers, list):
+            # Convert list of Header objects to dict
+            for header in incoming_headers:
+                if hasattr(header, 'name') and hasattr(header, 'value'):
+                    if header.name and header.value:
+                        headers[header.name] = header.value
+        elif isinstance(incoming_headers, dict):
+            # Merge dict headers
+            headers.update(incoming_headers)
+
+    reify = None
+    if json is None:
+        reify = lambda x: _session.request(method=method, url=url, headers=x, **kwargs)
+    else:
+        reify = lambda x: _session.request(
+            method=method, url=url, headers=x, json=json, **kwargs
+        )
+    response = reify(x=headers)
+    if response.status_code == 403:
+        headers["authorization"] = f"Bearer {get_auth_token().access_token}"
+        return reify(x=headers)
+    else:
+        return response
 
 
 def api_request(
