@@ -5,7 +5,6 @@ import webbrowser
 from base64 import b64encode
 from dataclasses import dataclass
 from os import getenv
-from typing import NoReturn
 
 import requests
 from dotenv import load_dotenv
