@@ -284,6 +284,7 @@ class FileDefinition(BaseModel):
             url=self.file_upload_request.url,
             headers=self.file_upload_request.headers,
             data=data,
+            drop_headers=True
         )
 
 

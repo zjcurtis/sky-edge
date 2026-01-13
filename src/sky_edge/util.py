@@ -65,7 +65,7 @@ def reify_with_json(
 
 
 def generic_request(
-    method: HttpMethods, url: str, json=None, **kwargs
+    method: HttpMethods, url: str, json=None, drop_headers: bool = False, **kwargs
 ) -> Response:
     # Handle headers parameter - can be dict or list of Header objects
     incoming_headers = kwargs.pop("headers", None)
@@ -76,11 +76,13 @@ def generic_request(
         "Bb-Api-Subscription-Key": BB_API_SUBSCRIPTION_KEY,
         "Content-Type": "application/json",
     }
-
+    # If we're asked to drop headers, we'll do it
+    if drop_headers:
+        headers = dict()
     # Merge incoming headers if provided
     if incoming_headers is not None:
-        
-        headers = dict()
+        if drop_headers:
+            headers = dict()
         if isinstance(incoming_headers, list):
             # Convert list of Header objects to dict
             for header in incoming_headers:
