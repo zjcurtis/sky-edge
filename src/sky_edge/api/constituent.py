@@ -5,7 +5,7 @@ from typing import Annotated, Union
 from pydantic import BaseModel, Field
 from requests import Response
 
-from ..util import Collection, FuzzyDate, HttpMethods, api_request
+from ..util import Collection, ContentType, FuzzyDate, HttpMethods, api_request
 
 
 class Address(BaseModel):
@@ -262,7 +262,7 @@ class Header(BaseModel):
 
 
 class RequestMetaData(BaseModel):
-    headers: list[Header] | None = None
+    headers: list[Header]
     method: HttpMethods
     url: str
 
@@ -275,14 +275,16 @@ class FileDefinition(BaseModel):
 
     # TODO: This does not handle thumbnails at all.
     # FIXME: We don't handle the content type header.
-    def upload_binary(self, data: str) -> Response:
-        resp = api_request(
+    def upload_binary(self, data: str, content_type: ContentType) -> Response:
+        self.file_upload_request.headers.append(
+            Header(name="Content-Type", value=content_type)
+        )
+        return api_request(
             method=self.file_upload_request.method,
             url=self.file_upload_request.url,
             headers=self.file_upload_request.headers,
             data=data,
         )
-        return resp
 
 
 class CollectionOfAddresses(Collection[Address]):

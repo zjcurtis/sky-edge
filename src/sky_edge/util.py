@@ -1,5 +1,4 @@
 from enum import StrEnum
-from time import sleep
 from typing import Generic, List, Optional, Type, TypeVar
 
 from pydantic import BaseModel
@@ -29,6 +28,12 @@ class FuzzyDate(BaseModel):
     y: int | None = None
 
 
+class ContentType(StrEnum):
+    TEXT = "text/plain"
+    PDF = "application/pdf"
+    JSON = "application/json"
+
+
 class Collection(BaseModel, Generic[T]):
     count: int
     next_link: Optional[str] = None
@@ -39,7 +44,9 @@ class Collection(BaseModel, Generic[T]):
             return None
         else:
             return api_request(
-                method=HttpMethods.GET, url=self.next_link, response_model=Collection[T]
+                method=HttpMethods.GET,
+                url=self.next_link,
+                response_model=Collection[T],
             )
 
 
@@ -57,7 +64,9 @@ def reify_with_json(
     )
 
 
-def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Response:
+def generic_request(
+    method: HttpMethods, url: str, json=None, **kwargs
+) -> Response:
     # Handle headers parameter - can be dict or list of Header objects
     incoming_headers = kwargs.pop("headers", None)
 
@@ -73,16 +82,17 @@ def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Respo
         if isinstance(incoming_headers, list):
             # Convert list of Header objects to dict
             for header in incoming_headers:
-                if hasattr(header, 'name') and hasattr(header, 'value'):
+                if hasattr(header, "name") and hasattr(header, "value"):
                     if header.name and header.value:
                         headers[header.name] = header.value
         elif isinstance(incoming_headers, dict):
             # Merge dict headers
             headers.update(incoming_headers)
-
     reify = None
     if json is None:
-        reify = lambda x: _session.request(method=method, url=url, headers=x, **kwargs)
+        reify = lambda x: _session.request(
+            method=method, url=url, headers=x, **kwargs
+        )
     else:
         reify = lambda x: _session.request(
             method=method, url=url, headers=x, json=json, **kwargs
@@ -96,7 +106,10 @@ def generic_request(method: HttpMethods, url: str, json=None, **kwargs) -> Respo
 
 
 def api_request(
-    method: HttpMethods, url: str, response_model: Type[T] | None = None, **kwargs
+    method: HttpMethods,
+    url: str,
+    response_model: Type[T] | None = None,
+    **kwargs,
 ) -> T | Response:
     response = generic_request(method=method, url=url, **kwargs)
     if str(response.status_code)[0] == "4":
