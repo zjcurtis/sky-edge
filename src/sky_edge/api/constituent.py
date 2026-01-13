@@ -222,11 +222,13 @@ class NameFormat(BaseModel):
     formatted_name: str | None = None
     primary_type: str | None = None
 
+
 class NameFormatEdit(BaseModel):
     configuration_id: str | None = None
     custom_format: bool | None = None
     formatted_name: str | None = None
     type: str
+
 
 class PrimaryNameFormat(BaseModel):
     id: str | None = None
@@ -235,16 +237,19 @@ class PrimaryNameFormat(BaseModel):
     custom_format: bool | None = None
     formatted_name: str | None = None
     type: str | None = None
-    
+
+
 class PrimaryNameFormatEdit(BaseModel):
     configuration_id: str | None = None
     custom_format: bool | None = None
     formatted_name: str | None = None
 
+
 class NameFormatSummary(BaseModel):
     additional_name_formats: list[NameFormat] | None = None
     primary_addressee: PrimaryNameFormat | None = None
     primary_salutation: PrimaryNameFormat | None = None
+
 
 class NewDocumentInfo(BaseModel):
     file_name: str | None = None
@@ -258,15 +263,26 @@ class Header(BaseModel):
 
 class RequestMetaData(BaseModel):
     headers: list[Header] | None = None
-    method: str | None = None
-    url: str | None = None
+    method: HttpMethods
+    url: str
 
 
 class FileDefinition(BaseModel):
     file_id: str | None = None
-    file_upload_request: RequestMetaData | None = None
+    file_upload_request: RequestMetaData
     thumbnail_id: str | None = None
     thumbnail_upload_request: RequestMetaData | None = None
+
+    # TODO: This does not handle thumbnails at all.
+    # FIXME: We don't handle the content type header.
+    def upload_binary(self, data: bytes) -> Response:
+        resp = api_request(
+            method=self.file_upload_request.method,
+            url=self.file_upload_request.url,
+            headers=self.file_upload_request.headers,
+            data=data,
+        )
+        return resp
 
 
 class CollectionOfAddresses(Collection[Address]):
@@ -545,21 +561,28 @@ def name_format_get(name_format_id: str) -> NameFormat | Response:
         response_model=NameFormat,
     )
 
-def name_format_patch(name_format_id: str, name: NameFormatEdit) -> Response :
+
+def name_format_patch(name_format_id: str, name: NameFormatEdit) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/nameformats/{name_format_id}",
-        data=name.model_dump_json(exclude_none=True)
+        data=name.model_dump_json(exclude_none=True),
     )
 
-def name_format_primary_patch(primary_name_format_id: str, name: PrimaryNameFormatEdit) -> Response :
+
+def name_format_primary_patch(
+    primary_name_format_id: str, name: PrimaryNameFormatEdit
+) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/primarynameformats/{primary_name_format_id}",
-        data=name.model_dump_json(exclude_none=True)
+        data=name.model_dump_json(exclude_none=True),
     )
 
-def name_format_summary_get(constituent_id: str) -> NameFormatSummary | Response :
+
+def name_format_summary_get(
+    constituent_id: str,
+) -> NameFormatSummary | Response:
     return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/nameformats/summary",
