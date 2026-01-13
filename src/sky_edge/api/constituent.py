@@ -275,7 +275,7 @@ class FileDefinition(BaseModel):
 
     # TODO: This does not handle thumbnails at all.
     # FIXME: We don't handle the content type header.
-    def upload_binary(self, data: bytes) -> Response:
+    def upload_binary(self, data: str) -> Response:
         resp = api_request(
             method=self.file_upload_request.method,
             url=self.file_upload_request.url,
