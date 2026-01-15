@@ -138,14 +138,14 @@ class AskFieldInformation(BaseModel):
 
 class ExecuteQueryByIdRequest(BaseModel):
     id: int
-    ux_mode: UxMode | None = None
-    output_format: OutputFormat | None = None
-    formatting_mode: FormattingMode | None = None
-    sql_generation_mode: SqlGenerationMode | None = None
-    use_static_query_id_set: bool | None = None
+    ux_mode: UxMode = UxMode.ASYNCHRONOUS
+    output_format: OutputFormat = OutputFormat.CSV
+    formatting_mode: FormattingMode = FormattingMode.NONE
+    sql_generation_mode: SqlGenerationMode = SqlGenerationMode.QUERY
+    use_static_query_id_set: bool = False
     results_file_name: str | None = None
     ask_fields: list[AskFieldInformation] | None = None
-    display_code_table_long_description: bool | None = None
+    display_code_table_long_description: bool = False
     time_zone_offset_in_minutes: int | None = None
 
 
