@@ -1,6 +1,7 @@
 from time import sleep
 
 from sky_edge.api.query import (
+    AskFieldInformation,
     ExecuteQueryByIdRequest,
     ExecuteQueryResponse,
     GetQueryCategoriesResponse,
@@ -43,13 +44,14 @@ def get_query_id_by_category_and_name(category: str, name: str) -> int | None:
                             return query.id
 
 
-def execute_query_by_name(id: int) -> bytes | None:
+def execute_query_by_name(
+    id: int, ask_fields: list[AskFieldInformation] | None = None
+) -> bytes | None:
     query_post_response = query_execution_job_by_id_post(
         Product.RE,
         module=Module.NONE,
         request=ExecuteQueryByIdRequest(
-            id=id,
-            ux_mode=UxMode.SYNCHRONOUS,
+            id=id, ux_mode=UxMode.SYNCHRONOUS, ask_fields=ask_fields
         ),
     )
     if isinstance(query_post_response, ExecuteQueryResponse):
