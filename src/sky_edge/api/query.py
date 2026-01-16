@@ -259,7 +259,7 @@ def query_execution_job_status_get(
     job_id: str,
     product: Product,
     module: Module,
-    include_read_url: IncludeReadUrl | None = None,
+    include_read_url: IncludeReadUrl = IncludeReadUrl.ONCE_COMPLETED,
     content_disposition: ContentDisposition | None = None,
 ) -> QueryExecutionJob | Response:
     """Gets information about a background query execution job.
