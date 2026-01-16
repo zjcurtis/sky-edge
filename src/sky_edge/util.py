@@ -65,7 +65,11 @@ def reify_with_json(
 
 
 def generic_request(
-    method: HttpMethods, url: str, json=None, drop_headers: bool = False, **kwargs
+    method: HttpMethods,
+    url: str,
+    json=None,
+    drop_headers: bool = False,
+    **kwargs,
 ) -> Response:
     # Handle headers parameter - can be dict or list of Header objects
     incoming_headers = kwargs.pop("headers", None)
