@@ -145,7 +145,7 @@ class ExecuteQueryByIdRequest(BaseModel):
     use_static_query_id_set: bool = False
     results_file_name: str | None = None
     ask_fields: list[AskFieldInformation] | None = None
-    display_code_table_long_description: bool = False
+    display_code_table_long_description: bool = True
     time_zone_offset_in_minutes: int | None = None
 
 
