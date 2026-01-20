@@ -164,6 +164,23 @@ class QueryExecutionJob(BaseModel):
     def fetch_content(self) -> Response:
         """Fetches the query results from the sas_uri.
 
+        The response encoding is automatically set to 'utf-8-sig' which handles
+        UTF-8 BOM (Byte Order Mark) that is commonly present in CSV files from
+        Azure blob storage.
+
+        Usage:
+            # For string content (BOM automatically removed):
+            response = job.fetch_content()
+            text_data = response.text
+
+            # For bytes content (BOM automatically removed):
+            response = job.fetch_content()
+            bytes_data = response.text.encode('utf-8')
+
+            # For raw bytes with BOM (not recommended):
+            response = job.fetch_content()
+            raw_bytes = response.content
+
         Returns:
             Response object containing the query results.
 
@@ -175,11 +192,18 @@ class QueryExecutionJob(BaseModel):
                 "sas_uri is not available. The job may not be completed yet."
             )
 
-        return api_request(
+        response = api_request(
             method=HttpMethods.GET,
             url=self.sas_uri,
             drop_headers=True,
         )
+
+        # Set encoding to UTF-8-SIG to automatically handle BOM if present
+        # Azure blob storage often returns CSV files with UTF-8 BOM encoding
+        if response.status_code == 200:
+            response.encoding = 'utf-8-sig'
+
+        return response
 
 
 class QueryListQuery(BaseModel):
