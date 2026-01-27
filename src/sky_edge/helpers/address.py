@@ -17,10 +17,6 @@ def _addresses_have_same_location(addr1: Address, addr2: Address) -> bool:
         and addr1.state == addr2.state
         and addr1.postal_code == addr2.postal_code
         and addr1.country == addr2.country
-        and addr1.county == addr2.county
-        and addr1.suburb == addr2.suburb
-        and addr1.region == addr2.region
-        and addr1.type == addr2.type
     )
 
 
@@ -85,3 +81,4 @@ def get_overlapping_addresses(
             overlapping_pairs.append((addr1, addr2))
 
     return overlapping_pairs
+
