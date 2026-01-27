@@ -343,7 +343,7 @@ def address_patch(address: Address) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/addresses/{address.id}",
-        data=address.model_dump_json(exclude_none=True),
+        data=address.model_dump_json(exclude_none=False),
     )
 
 
@@ -409,7 +409,7 @@ def constituent_patch(constituent: Constituent) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}",
-        data=constituent.model_dump_json(exclude_none=True),
+        data=constituent.model_dump_json(exclude_none=False),
     )
 
 
@@ -493,7 +493,7 @@ def alias_patch(alias: Alias) -> Response:
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/aliases/{alias.id}",
         data=alias.model_dump_json(
-            exclude_none=True, exclude={"id", "constituent_id"}
+            exclude_none=False, exclude={"id", "constituent_id"}
         ),
     )
 
@@ -520,7 +520,7 @@ def relationship_patch(relationship: Relationship) -> Response:
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/relationships/{relationship.id}",
         data=relationship.model_dump_json(
-            exclude_none=True, exclude={"id", "constituent_id"}
+            exclude_none=False, exclude={"id", "constituent_id"}
         ),
     )
 
@@ -569,7 +569,7 @@ def name_format_patch(name_format_id: str, name: NameFormatEdit) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/nameformats/{name_format_id}",
-        data=name.model_dump_json(exclude_none=True),
+        data=name.model_dump_json(exclude_none=False),
     )
 
 
@@ -579,7 +579,7 @@ def name_format_primary_patch(
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/primarynameformats/{primary_name_format_id}",
-        data=name.model_dump_json(exclude_none=True),
+        data=name.model_dump_json(exclude_none=False),
     )
 
 
