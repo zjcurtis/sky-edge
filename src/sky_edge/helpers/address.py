@@ -1,10 +1,10 @@
 from datetime import datetime
+from itertools import combinations
 
 from requests import Response
 
 from sky_edge.api.constituent import (
     Address,
-    CollectionOfAddresses,
     address_list_constituent_get,
 )
 
@@ -49,7 +49,7 @@ def _date_ranges_overlap(
 
 def get_overlapping_addresses(
     constituent_id: str, include_inactive: bool = True
-) -> list[list[Address]] | Response:
+) -> list[tuple[Address, Address]] | Response:
     """
     Get addresses for a constituent that have overlapping dates with the same
     address information.
@@ -60,9 +60,8 @@ def get_overlapping_addresses(
             since we want to find all potential overlaps.
 
     Returns:
-        A list of groups, where each group contains addresses that share the same
-        location information and have overlapping date ranges. Only groups with
-        2 or more addresses are returned. Returns a Response object if the API
+        A list of pairs of addresses that share the same location information
+        and have overlapping date ranges. Returns a Response object if the API
         call fails.
     """
     result = address_list_constituent_get(
@@ -77,31 +76,12 @@ def get_overlapping_addresses(
     if len(addresses) < 2:
         return []
 
-    # Track which addresses have been assigned to a group
-    assigned: set[str] = set()
-    overlapping_groups: list[list[Address]] = []
+    overlapping_pairs: list[tuple[Address, Address]] = []
 
-    for i, addr1 in enumerate(addresses):
-        if addr1.id in assigned:
-            continue
+    for addr1, addr2 in combinations(addresses, 2):
+        if _addresses_have_same_location(addr1, addr2) and _date_ranges_overlap(
+            addr1.start, addr1.end, addr2.start, addr2.end
+        ):
+            overlapping_pairs.append((addr1, addr2))
 
-        # Find all addresses that overlap with addr1 and have the same location
-        group: list[Address] = [addr1]
-
-        for j, addr2 in enumerate(addresses):
-            if i == j or addr2.id in assigned:
-                continue
-
-            if _addresses_have_same_location(addr1, addr2) and _date_ranges_overlap(
-                addr1.start, addr1.end, addr2.start, addr2.end
-            ):
-                group.append(addr2)
-
-        # Only include groups with 2 or more overlapping addresses
-        if len(group) >= 2:
-            for addr in group:
-                if addr.id:
-                    assigned.add(addr.id)
-            overlapping_groups.append(group)
-
-    return overlapping_groups
+    return overlapping_pairs
