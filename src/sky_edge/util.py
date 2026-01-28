@@ -115,7 +115,7 @@ def generic_request(
         )
     response = reify(x=headers)
     if 500 > response.status_code > 399:
-        logger.info(msg=response)
+        logger.info(msg=f"{response.headers} {response.reason} {response.text}")
     if response.status_code == 403:
         headers["authorization"] = f"Bearer {get_auth_token().access_token}"
         return reify(x=headers)
