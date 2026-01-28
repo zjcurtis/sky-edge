@@ -122,7 +122,7 @@ def generic_request(
             print(
                 f"Sleeping {response.headers['Retry-After']} seconds for rate limiting"
             )
-            sleep(response.headers["Retry-After"])
+            sleep(int(response.headers["Retry-After"]))
             return reify(x=headers)
         else:
             headers["authorization"] = f"Bearer {get_auth_token().access_token}"
