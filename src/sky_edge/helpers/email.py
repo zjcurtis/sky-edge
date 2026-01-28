@@ -9,7 +9,7 @@ def get_duplicate_emails(
     constituent_id: str, include_inactive: bool = False
 ) -> dict[str, Email] | None:
     email_list_response = email_list_constituent_get(constituent_id)
-    if isinstance(email_list_constituent_get, CollectionOfEmails):
+    if isinstance(email_list_response, CollectionOfEmails):
         duplicate_dictionary = {}
         for email in email_list_response.value:
             if email.address in duplicate_dictionary:
