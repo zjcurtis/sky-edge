@@ -17,8 +17,10 @@ def get_duplicate_emails(
             else:
                 duplicate_dictionary[email.address] = [email]
 
+        to_pop = []
         for k, v in duplicate_dictionary.items():
             if len(v) == 1:
-                duplicate_dictionary.pop(k)
+                to_pop.append(k)
+        _ = [duplicate_dictionary.pop(k) for k in to_pop]
 
         return duplicate_dictionary
