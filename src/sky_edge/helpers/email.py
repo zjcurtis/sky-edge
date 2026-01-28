@@ -12,10 +12,10 @@ def get_duplicate_emails(
     if isinstance(email_list_response, CollectionOfEmails):
         duplicate_dictionary = {}
         for email in email_list_response.value:
-            if email.address in duplicate_dictionary:
-                duplicate_dictionary[email.address].append(email)
+            if email.address.lower() in duplicate_dictionary:
+                duplicate_dictionary[email.address.lower()].append(email)
             else:
-                duplicate_dictionary[email.address] = [email]
+                duplicate_dictionary[email.address.lower()] = [email]
 
         to_pop = []
         for k, v in duplicate_dictionary.items():
