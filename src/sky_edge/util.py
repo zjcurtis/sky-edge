@@ -1,9 +1,8 @@
-import logging
-from loguru import logger
 from enum import StrEnum
 from time import sleep
 from typing import Generic, List, Optional, Type, TypeVar
 
+from loguru import logger
 from pydantic import BaseModel
 from requests import Response, Session
 
@@ -110,7 +109,7 @@ def generic_request(
         )
     response = reify(x=headers)
     if 500 > response.status_code > 399:
-        logger.warning("{headers} {reason} {text}",response.headers,response.reason,response.text)
+        logger.warning(response.text)
     if response.status_code == 403:
         if "Retry-After" in response.headers:
             print(
