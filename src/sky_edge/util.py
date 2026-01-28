@@ -1,3 +1,4 @@
+import logging
 from enum import StrEnum
 from typing import Generic, List, Optional, Type, TypeVar
 
@@ -9,6 +10,13 @@ from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 _session = Session()
 
 T = TypeVar("T", bound=BaseModel | str | None)
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    filename="warn.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s:%(message)s",
+)
 
 
 class HttpMethods(StrEnum):
@@ -106,6 +114,8 @@ def generic_request(
             method=method, url=url, headers=x, json=json, **kwargs
         )
     response = reify(x=headers)
+    if 500 > response.status_code > 399:
+        logger.info(msg=response)
     if response.status_code == 403:
         headers["authorization"] = f"Bearer {get_auth_token().access_token}"
         return reify(x=headers)
