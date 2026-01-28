@@ -1,5 +1,6 @@
 import logging
 from enum import StrEnum
+from time import sleep
 from typing import Generic, List, Optional, Type, TypeVar
 
 from pydantic import BaseModel
@@ -117,8 +118,15 @@ def generic_request(
     if 500 > response.status_code > 399:
         logger.info(msg=f"{response.headers} {response.reason} {response.text}")
     if response.status_code == 403:
-        headers["authorization"] = f"Bearer {get_auth_token().access_token}"
-        return reify(x=headers)
+        if "Retry-After" in response.headers:
+            print(
+                f"Sleeping {response.headers['Retry-After']} seconds for rate limiting"
+            )
+            sleep(response.headers["Retry-After"])
+            return reify(x=headers)
+        else:
+            headers["authorization"] = f"Bearer {get_auth_token().access_token}"
+            return reify(x=headers)
     else:
         return response
 
