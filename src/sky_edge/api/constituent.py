@@ -284,7 +284,7 @@ class FileDefinition(BaseModel):
             url=self.file_upload_request.url,
             headers=self.file_upload_request.headers,
             data=data,
-            drop_headers=True
+            drop_headers=True,
         )
 
 
@@ -438,6 +438,14 @@ def email_list_constituent_get(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses",
         response_model=CollectionOfEmails,
+    )
+
+
+def email_patch(email: Email) -> Response:
+    return api_request(
+        method=HttpMethods.PATCH,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/emailaddresses/{email.id}",
+        data=email.model_dump_json(exclude_none=False),
     )
 
 
