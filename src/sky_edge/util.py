@@ -1,5 +1,5 @@
 import logging
-from loguru import logger, Logger
+from loguru import logger
 from enum import StrEnum
 from time import sleep
 from typing import Generic, List, Optional, Type, TypeVar
