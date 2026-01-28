@@ -1,4 +1,5 @@
 import logging
+from loguru import logger, Logger
 from enum import StrEnum
 from time import sleep
 from typing import Generic, List, Optional, Type, TypeVar
@@ -11,13 +12,6 @@ from .auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
 _session = Session()
 
 T = TypeVar("T", bound=BaseModel | str | None)
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    filename="warn.log",
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s:%(message)s",
-)
 
 
 class HttpMethods(StrEnum):
@@ -116,7 +110,7 @@ def generic_request(
         )
     response = reify(x=headers)
     if 500 > response.status_code > 399:
-        logger.info(msg=f"{response.headers} {response.reason} {response.text}")
+        logger.warning("{headers} {reason} {text}",response.headers,response.reason,response.text)
     if response.status_code == 403:
         if "Retry-After" in response.headers:
             print(
