@@ -432,11 +432,14 @@ def email_list_all_get(**kwargs) -> CollectionOfEmails | Response:
 
 
 def email_list_constituent_get(
-    constituent_id: str,
+    constituent_id: str, include_inactive: bool = False
 ) -> CollectionOfEmails | Response:
+    url = f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses"
+    if include_inactive:
+        url = f"{url}?include_inactive=true"
     return api_request(
         method=HttpMethods.GET,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/emailaddresses",
+        url=url,
         response_model=CollectionOfEmails,
     )
 
