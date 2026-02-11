@@ -189,8 +189,8 @@ class Email(BaseModel):
     id: str
     address: str
     constituent_id: str
-    date_added: datetime
-    date_modified: datetime
+    date_added: datetime | None = None
+    date_modified: datetime | None = None
     do_not_email: bool
     inactive: bool
     primary: bool
