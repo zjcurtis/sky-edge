@@ -424,10 +424,10 @@ def constituent_patch(constituent: Constituent) -> Response:
         data=constituent.model_dump_json(exclude_none=False),
     )
 
-def custom_field_list_constituent_get(constituent: Constituent) -> CollectionOfCustomFields | Response: 
+def custom_field_list_constituent_get(constituent_id: str) -> CollectionOfCustomFields | Response: 
     return api_request(
         method=HttpMethods.GET,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}/customfields",
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/customfields",
         response_model=CollectionOfCustomFields
     )
 
