@@ -144,6 +144,16 @@ class ConstituentListQuery(BaseModel):
     limit: Union[Annotated[int, Field(ge=1, le=5000)], None] = None
     offset: int | None = None
 
+class CustomField(BaseModel):
+    id: str | None = None
+    category: str | None = None
+    comment: str | None = None
+    date: datetime | None = None
+    date_added: datetime | None = None
+    date_modified: datetime | None = None
+    parent_id: str | None = None
+    type: str | None = None
+    value: str | None = None
 
 class Relationship(BaseModel):
     id: str | None = None
@@ -299,6 +309,8 @@ class CollectionOfConstituents(Collection[Constituent]):
 class CollectionOfConstituentSearchResults(Collection[ConstituentSearchResult]):
     pass
 
+class CollectionOfCustomFields(Collection[CustomField]):
+    pass
 
 class CollectionOfRelationships(Collection[Relationship]):
     pass
@@ -412,6 +424,18 @@ def constituent_patch(constituent: Constituent) -> Response:
         data=constituent.model_dump_json(exclude_none=False),
     )
 
+def custom_field_list_constituent_get(constituent: Constituent) -> CollectionOfCustomFields | Response: 
+    return api_request(
+        method=HttpMethods.GET,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}/customfields",
+        response_model=CollectionOfCustomFields
+    )
+
+def custom_field_delete(customfield: CustomField) -> Response:
+    return api_request(
+        method=HttpMethods.DELETE,
+        url=f"https://api.sky.blackbaud.com/constituent/v1/educations/customfields/{customfield.id}"
+    )
 
 def document_post(request: NewDocumentInfo) -> FileDefinition | Response:
     return api_request(
