@@ -36,6 +36,12 @@ class Address(BaseModel):
     dpc: str | None = None
 
 
+class AliasAdd(BaseModel):
+    constituent_id: str
+    name: str
+    type: str | None = None
+
+
 class AttachmentType(StrEnum):
     LINK = "Link"
     PHYSICAL = "Physical"
@@ -144,6 +150,7 @@ class ConstituentListQuery(BaseModel):
     limit: Union[Annotated[int, Field(ge=1, le=5000)], None] = None
     offset: int | None = None
 
+
 class CustomField(BaseModel):
     id: str | None = None
     category: str | None = None
@@ -154,6 +161,7 @@ class CustomField(BaseModel):
     parent_id: str | None = None
     type: str | None = None
     value: str | None = None
+
 
 class Relationship(BaseModel):
     id: str | None = None
@@ -309,8 +317,10 @@ class CollectionOfConstituents(Collection[Constituent]):
 class CollectionOfConstituentSearchResults(Collection[ConstituentSearchResult]):
     pass
 
+
 class CollectionOfCustomFields(Collection[CustomField]):
     pass
+
 
 class CollectionOfRelationships(Collection[Relationship]):
     pass
@@ -424,18 +434,23 @@ def constituent_patch(constituent: Constituent) -> Response:
         data=constituent.model_dump_json(exclude_none=False),
     )
 
-def custom_field_list_constituent_get(constituent_id: str) -> CollectionOfCustomFields | Response: 
+
+def custom_field_list_constituent_get(
+    constituent_id: str,
+) -> CollectionOfCustomFields | Response:
     return api_request(
         method=HttpMethods.GET,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent_id}/customfields",
-        response_model=CollectionOfCustomFields
+        response_model=CollectionOfCustomFields,
     )
+
 
 def custom_field_delete(customfield: CustomField) -> Response:
     return api_request(
         method=HttpMethods.DELETE,
-        url=f"https://api.sky.blackbaud.com/constituent/v1/educations/customfields/{customfield.id}"
+        url=f"https://api.sky.blackbaud.com/constituent/v1/educations/customfields/{customfield.id}",
     )
+
 
 def document_post(request: NewDocumentInfo) -> FileDefinition | Response:
     return api_request(
@@ -498,6 +513,15 @@ def phone_delete(phone: Phone) -> Response:
         method=HttpMethods.DELETE,
         url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
     )
+
+
+def alias_post(alias: AliasAdd) -> Response:
+    response = api_request(
+        method=HttpMethods.POST,
+        url="https://api.sky.blackbaud.com/constituent/v1/aliases",
+        data=alias.model_dump_json(exclude_none=True),
+    )
+    return response
 
 
 def alias_list_constituent_get(
