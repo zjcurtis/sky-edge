@@ -431,7 +431,7 @@ def constituent_patch(constituent: Constituent) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/constituents/{constituent.id}",
-        data=constituent.model_dump_json(exclude_none=False),
+        data=constituent.model_dump_json(exclude_none=True),
     )
 
 
