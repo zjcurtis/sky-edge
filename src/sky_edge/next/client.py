@@ -1,8 +1,44 @@
+import asyncio
 import ssl
+import time
 from typing import Any
 
 import httpx
 from attrs import define, evolve, field
+
+from ..auth import BB_API_SUBSCRIPTION_KEY, get_auth_token
+
+
+class BlackbaudAuth(httpx.Auth):
+    """Injects Blackbaud Bearer token and subscription key on every request.
+
+    On a 403 response: sleeps for Retry-After seconds if the header is present
+    (rate limit), then refreshes the token and retries once regardless.
+    """
+
+    def auth_flow(self, request: httpx.Request):
+        tokens = get_auth_token()
+        request.headers["Authorization"] = f"Bearer {tokens.access_token}"
+        request.headers["Bb-Api-Subscription-Key"] = BB_API_SUBSCRIPTION_KEY
+        response = yield request
+        if response.status_code == 403:
+            if "Retry-After" in response.headers:
+                time.sleep(int(response.headers["Retry-After"]))
+            tokens = get_auth_token()
+            request.headers["Authorization"] = f"Bearer {tokens.access_token}"
+            yield request
+
+    async def async_auth_flow(self, request: httpx.Request):
+        tokens = await asyncio.to_thread(get_auth_token)
+        request.headers["Authorization"] = f"Bearer {tokens.access_token}"
+        request.headers["Bb-Api-Subscription-Key"] = BB_API_SUBSCRIPTION_KEY
+        response = yield request
+        if response.status_code == 403:
+            if "Retry-After" in response.headers:
+                await asyncio.sleep(int(response.headers["Retry-After"]))
+            tokens = await asyncio.to_thread(get_auth_token)
+            request.headers["Authorization"] = f"Bearer {tokens.access_token}"
+            yield request
 
 
 @define
@@ -280,3 +316,45 @@ class AuthenticatedClient:
     async def __aexit__(self, *args: Any, **kwargs: Any) -> None:
         """Exit a context manager for underlying httpx.AsyncClient (see httpx docs)"""
         await self.get_async_httpx_client().__aexit__(*args, **kwargs)
+
+
+@define
+class BlackbaudClient(Client):
+    """Client pre-configured for the Blackbaud Sky API.
+
+    Handles OAuth2 token injection, automatic token refresh, Bb-Api-Subscription-Key
+    injection, and rate-limit retry transparently on every request via BlackbaudAuth.
+
+    Pass the Sky API namespace base URL, e.g.
+    ``"https://api.sky.blackbaud.com/constituent/v1/"``.
+    """
+
+    def get_httpx_client(self) -> httpx.Client:
+        """Get the underlying httpx.Client, constructing a new one if not previously set"""
+        if self._client is None:
+            self._client = httpx.Client(
+                base_url=self._base_url,
+                cookies=self._cookies,
+                headers=self._headers,
+                timeout=self._timeout,
+                verify=self._verify_ssl,
+                follow_redirects=self._follow_redirects,
+                auth=BlackbaudAuth(),
+                **self._httpx_args,
+            )
+        return self._client
+
+    def get_async_httpx_client(self) -> httpx.AsyncClient:
+        """Get the underlying httpx.AsyncClient, constructing a new one if not previously set"""
+        if self._async_client is None:
+            self._async_client = httpx.AsyncClient(
+                base_url=self._base_url,
+                cookies=self._cookies,
+                headers=self._headers,
+                timeout=self._timeout,
+                verify=self._verify_ssl,
+                follow_redirects=self._follow_redirects,
+                auth=BlackbaudAuth(),
+                **self._httpx_args,
+            )
+        return self._async_client
