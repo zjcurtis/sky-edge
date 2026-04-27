@@ -127,8 +127,8 @@ class GetQueryListResponse(BaseModel):
     queries: list[QuerySummary] | None = None
     any_query_types: bool | None = None
     count: int | None = None
-    limit: int
-    offset: int
+    limit: int | None = None
+    offset: int | None = None
 
 
 class AskFieldInformation(BaseModel):
