@@ -1,0 +1,234 @@
+from http import HTTPStatus
+from typing import Any, cast
+
+import httpx
+
+from sky_edge.next import errors
+from sky_edge.next.client import AuthenticatedClient, Client
+from sky_edge.next.types import UNSET, Response, Unset
+
+from ...models.api_collection_gift_read import ApiCollectionGiftRead
+from ...models.gift_list_options import GiftListOptions
+
+
+def _get_kwargs(
+    *,
+    body: GiftListOptions | Unset = UNSET,
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
+
+    _kwargs: dict[str, Any] = {
+        "method": "post",
+        "url": "/gifts/list",
+    }
+
+    if not isinstance(body, Unset):
+        _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | ApiCollectionGiftRead | None:
+    if response.status_code == 200:
+        response_200 = ApiCollectionGiftRead.from_dict(response.json())
+
+        return response_200
+
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 403:
+        response_403 = cast(Any, None)
+        return response_403
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | ApiCollectionGiftRead]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    body: GiftListOptions | Unset = UNSET,
+) -> Response[Any | ApiCollectionGiftRead]:
+    """Gift list
+
+     Returns a paginated list of gifts.
+    <p />
+    The default sorting behavior is to list gifts in ascending order based on the <code>id</code>.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gifts in ascending order based on when they were last modified, and the <code>date_added</code>
+    parameter overrides the default sorting behavior to list gifts in ascending order based on when they
+    were created. The <code>last_modified</code> and <code>date_added</code> parameters also add the
+    <code>sort_token</code> parameter to the <code>next_link</code> URL to ensure that gifts are stably
+    sorted and that order persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gifts based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes.
+
+    Args:
+        body (GiftListOptions | Unset): Defines options and filter criteria when getting a list of
+            gifts.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Any | ApiCollectionGiftRead]
+    """
+
+    kwargs = _get_kwargs(
+        body=body,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    *,
+    client: AuthenticatedClient | Client,
+    body: GiftListOptions | Unset = UNSET,
+) -> Any | ApiCollectionGiftRead | None:
+    """Gift list
+
+     Returns a paginated list of gifts.
+    <p />
+    The default sorting behavior is to list gifts in ascending order based on the <code>id</code>.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gifts in ascending order based on when they were last modified, and the <code>date_added</code>
+    parameter overrides the default sorting behavior to list gifts in ascending order based on when they
+    were created. The <code>last_modified</code> and <code>date_added</code> parameters also add the
+    <code>sort_token</code> parameter to the <code>next_link</code> URL to ensure that gifts are stably
+    sorted and that order persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gifts based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes.
+
+    Args:
+        body (GiftListOptions | Unset): Defines options and filter criteria when getting a list of
+            gifts.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | ApiCollectionGiftRead
+    """
+
+    return sync_detailed(
+        client=client,
+        body=body,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    body: GiftListOptions | Unset = UNSET,
+) -> Response[Any | ApiCollectionGiftRead]:
+    """Gift list
+
+     Returns a paginated list of gifts.
+    <p />
+    The default sorting behavior is to list gifts in ascending order based on the <code>id</code>.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gifts in ascending order based on when they were last modified, and the <code>date_added</code>
+    parameter overrides the default sorting behavior to list gifts in ascending order based on when they
+    were created. The <code>last_modified</code> and <code>date_added</code> parameters also add the
+    <code>sort_token</code> parameter to the <code>next_link</code> URL to ensure that gifts are stably
+    sorted and that order persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gifts based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes.
+
+    Args:
+        body (GiftListOptions | Unset): Defines options and filter criteria when getting a list of
+            gifts.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Any | ApiCollectionGiftRead]
+    """
+
+    kwargs = _get_kwargs(
+        body=body,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: AuthenticatedClient | Client,
+    body: GiftListOptions | Unset = UNSET,
+) -> Any | ApiCollectionGiftRead | None:
+    """Gift list
+
+     Returns a paginated list of gifts.
+    <p />
+    The default sorting behavior is to list gifts in ascending order based on the <code>id</code>.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gifts in ascending order based on when they were last modified, and the <code>date_added</code>
+    parameter overrides the default sorting behavior to list gifts in ascending order based on when they
+    were created. The <code>last_modified</code> and <code>date_added</code> parameters also add the
+    <code>sort_token</code> parameter to the <code>next_link</code> URL to ensure that gifts are stably
+    sorted and that order persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gifts based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes.
+
+    Args:
+        body (GiftListOptions | Unset): Defines options and filter criteria when getting a list of
+            gifts.
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | ApiCollectionGiftRead
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            body=body,
+        )
+    ).parsed

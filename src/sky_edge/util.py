@@ -100,9 +100,7 @@ def generic_request(
             headers.update(incoming_headers)
     reify = None
     if json is None:
-        reify = lambda x: _session.request(
-            method=method, url=url, headers=x, **kwargs
-        )
+        reify = lambda x: _session.request(method=method, url=url, headers=x, **kwargs)
     else:
         reify = lambda x: _session.request(
             method=method, url=url, headers=x, json=json, **kwargs

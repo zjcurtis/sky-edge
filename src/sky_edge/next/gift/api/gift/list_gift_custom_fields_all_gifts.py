@@ -1,0 +1,375 @@
+import datetime
+from http import HTTPStatus
+from typing import Any, cast
+
+import httpx
+
+from sky_edge.next import errors
+from sky_edge.next.client import AuthenticatedClient, Client
+from sky_edge.next.types import UNSET, Response, Unset
+
+from ...models.api_collection_custom_field_read import ApiCollectionCustomFieldRead
+
+
+def _get_kwargs(
+    *,
+    date_added: datetime.datetime | Unset = UNSET,
+    last_modified: datetime.datetime | Unset = UNSET,
+    sort_token: str | Unset = UNSET,
+    category: list[str] | Unset = UNSET,
+    value: list[str] | Unset = UNSET,
+    gift_id: list[str] | Unset = UNSET,
+    include_count: bool | Unset = UNSET,
+    limit: int | Unset = UNSET,
+    offset: int | Unset = UNSET,
+) -> dict[str, Any]:
+    params: dict[str, Any] = {}
+
+    json_date_added: str | Unset = UNSET
+    if not isinstance(date_added, Unset):
+        json_date_added = date_added.isoformat()
+    params["date_added"] = json_date_added
+
+    json_last_modified: str | Unset = UNSET
+    if not isinstance(last_modified, Unset):
+        json_last_modified = last_modified.isoformat()
+    params["last_modified"] = json_last_modified
+
+    params["sort_token"] = sort_token
+
+    json_category: list[str] | Unset = UNSET
+    if not isinstance(category, Unset):
+        json_category = category
+
+    params["category"] = json_category
+
+    json_value: list[str] | Unset = UNSET
+    if not isinstance(value, Unset):
+        json_value = value
+
+    params["value"] = json_value
+
+    json_gift_id: list[str] | Unset = UNSET
+    if not isinstance(gift_id, Unset):
+        json_gift_id = gift_id
+
+    params["gift_id"] = json_gift_id
+
+    params["include_count"] = include_count
+
+    params["limit"] = limit
+
+    params["offset"] = offset
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+    _kwargs: dict[str, Any] = {
+        "method": "get",
+        "url": "/gifts/customfields",
+        "params": params,
+    }
+
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Any | ApiCollectionCustomFieldRead | None:
+    if response.status_code == 200:
+        response_200 = ApiCollectionCustomFieldRead.from_dict(response.json())
+
+        return response_200
+
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 403:
+        response_403 = cast(Any, None)
+        return response_403
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[Any | ApiCollectionCustomFieldRead]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    date_added: datetime.datetime | Unset = UNSET,
+    last_modified: datetime.datetime | Unset = UNSET,
+    sort_token: str | Unset = UNSET,
+    category: list[str] | Unset = UNSET,
+    value: list[str] | Unset = UNSET,
+    gift_id: list[str] | Unset = UNSET,
+    include_count: bool | Unset = UNSET,
+    limit: int | Unset = UNSET,
+    offset: int | Unset = UNSET,
+) -> Response[Any | ApiCollectionCustomFieldRead]:
+    """Gift custom field list (All gifts)
+
+     Returns a paginated list of gift custom fields.
+    <p />
+    The default sorting behavior is to list gift custom fields in ascending order based on when they
+    were created.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gift custom fields in ascending order based on when they were last modified. The
+    <code>last_modified</code> parameter also adds the <code>sort_token</code> parameter to the
+    <code>next_link</code> URL to ensure that gift custom fields are stably sorted and that order
+    persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gift custom fields based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes. In
+    addition, historic records have a default <code>date_added</code> timestamp of 1600-01-01
+    00:00:00.000 +00:00. The timestamp for newer records reflects when the records were added.
+
+    Args:
+        date_added (datetime.datetime | Unset):
+        last_modified (datetime.datetime | Unset):
+        sort_token (str | Unset):
+        category (list[str] | Unset):
+        value (list[str] | Unset):
+        gift_id (list[str] | Unset):
+        include_count (bool | Unset):
+        limit (int | Unset):
+        offset (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Any | ApiCollectionCustomFieldRead]
+    """
+
+    kwargs = _get_kwargs(
+        date_added=date_added,
+        last_modified=last_modified,
+        sort_token=sort_token,
+        category=category,
+        value=value,
+        gift_id=gift_id,
+        include_count=include_count,
+        limit=limit,
+        offset=offset,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    *,
+    client: AuthenticatedClient | Client,
+    date_added: datetime.datetime | Unset = UNSET,
+    last_modified: datetime.datetime | Unset = UNSET,
+    sort_token: str | Unset = UNSET,
+    category: list[str] | Unset = UNSET,
+    value: list[str] | Unset = UNSET,
+    gift_id: list[str] | Unset = UNSET,
+    include_count: bool | Unset = UNSET,
+    limit: int | Unset = UNSET,
+    offset: int | Unset = UNSET,
+) -> Any | ApiCollectionCustomFieldRead | None:
+    """Gift custom field list (All gifts)
+
+     Returns a paginated list of gift custom fields.
+    <p />
+    The default sorting behavior is to list gift custom fields in ascending order based on when they
+    were created.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gift custom fields in ascending order based on when they were last modified. The
+    <code>last_modified</code> parameter also adds the <code>sort_token</code> parameter to the
+    <code>next_link</code> URL to ensure that gift custom fields are stably sorted and that order
+    persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gift custom fields based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes. In
+    addition, historic records have a default <code>date_added</code> timestamp of 1600-01-01
+    00:00:00.000 +00:00. The timestamp for newer records reflects when the records were added.
+
+    Args:
+        date_added (datetime.datetime | Unset):
+        last_modified (datetime.datetime | Unset):
+        sort_token (str | Unset):
+        category (list[str] | Unset):
+        value (list[str] | Unset):
+        gift_id (list[str] | Unset):
+        include_count (bool | Unset):
+        limit (int | Unset):
+        offset (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | ApiCollectionCustomFieldRead
+    """
+
+    return sync_detailed(
+        client=client,
+        date_added=date_added,
+        last_modified=last_modified,
+        sort_token=sort_token,
+        category=category,
+        value=value,
+        gift_id=gift_id,
+        include_count=include_count,
+        limit=limit,
+        offset=offset,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    date_added: datetime.datetime | Unset = UNSET,
+    last_modified: datetime.datetime | Unset = UNSET,
+    sort_token: str | Unset = UNSET,
+    category: list[str] | Unset = UNSET,
+    value: list[str] | Unset = UNSET,
+    gift_id: list[str] | Unset = UNSET,
+    include_count: bool | Unset = UNSET,
+    limit: int | Unset = UNSET,
+    offset: int | Unset = UNSET,
+) -> Response[Any | ApiCollectionCustomFieldRead]:
+    """Gift custom field list (All gifts)
+
+     Returns a paginated list of gift custom fields.
+    <p />
+    The default sorting behavior is to list gift custom fields in ascending order based on when they
+    were created.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gift custom fields in ascending order based on when they were last modified. The
+    <code>last_modified</code> parameter also adds the <code>sort_token</code> parameter to the
+    <code>next_link</code> URL to ensure that gift custom fields are stably sorted and that order
+    persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gift custom fields based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes. In
+    addition, historic records have a default <code>date_added</code> timestamp of 1600-01-01
+    00:00:00.000 +00:00. The timestamp for newer records reflects when the records were added.
+
+    Args:
+        date_added (datetime.datetime | Unset):
+        last_modified (datetime.datetime | Unset):
+        sort_token (str | Unset):
+        category (list[str] | Unset):
+        value (list[str] | Unset):
+        gift_id (list[str] | Unset):
+        include_count (bool | Unset):
+        limit (int | Unset):
+        offset (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[Any | ApiCollectionCustomFieldRead]
+    """
+
+    kwargs = _get_kwargs(
+        date_added=date_added,
+        last_modified=last_modified,
+        sort_token=sort_token,
+        category=category,
+        value=value,
+        gift_id=gift_id,
+        include_count=include_count,
+        limit=limit,
+        offset=offset,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: AuthenticatedClient | Client,
+    date_added: datetime.datetime | Unset = UNSET,
+    last_modified: datetime.datetime | Unset = UNSET,
+    sort_token: str | Unset = UNSET,
+    category: list[str] | Unset = UNSET,
+    value: list[str] | Unset = UNSET,
+    gift_id: list[str] | Unset = UNSET,
+    include_count: bool | Unset = UNSET,
+    limit: int | Unset = UNSET,
+    offset: int | Unset = UNSET,
+) -> Any | ApiCollectionCustomFieldRead | None:
+    """Gift custom field list (All gifts)
+
+     Returns a paginated list of gift custom fields.
+    <p />
+    The default sorting behavior is to list gift custom fields in ascending order based on when they
+    were created.
+    <p />
+    However, the <code>last_modified</code> parameter overrides the default sorting behavior to list
+    gift custom fields in ascending order based on when they were last modified. The
+    <code>last_modified</code> parameter also adds the <code>sort_token</code> parameter to the
+    <code>next_link</code> URL to ensure that gift custom fields are stably sorted and that order
+    persists when changes occur while working through a paginated list.
+    <p />
+    If the <code>last_modified</code> and <code>date_added</code> parameters are both specified, the
+    sorting behavior is to list gift custom fields based on when they were last modified.
+    <p /><b>Note:</b> This endpoint returns data with an average latency of about 30 minutes. In
+    addition, historic records have a default <code>date_added</code> timestamp of 1600-01-01
+    00:00:00.000 +00:00. The timestamp for newer records reflects when the records were added.
+
+    Args:
+        date_added (datetime.datetime | Unset):
+        last_modified (datetime.datetime | Unset):
+        sort_token (str | Unset):
+        category (list[str] | Unset):
+        value (list[str] | Unset):
+        gift_id (list[str] | Unset):
+        include_count (bool | Unset):
+        limit (int | Unset):
+        offset (int | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Any | ApiCollectionCustomFieldRead
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            date_added=date_added,
+            last_modified=last_modified,
+            sort_token=sort_token,
+            category=category,
+            value=value,
+            gift_id=gift_id,
+            include_count=include_count,
+            limit=limit,
+            offset=offset,
+        )
+    ).parsed

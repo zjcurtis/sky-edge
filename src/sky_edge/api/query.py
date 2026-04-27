@@ -201,7 +201,7 @@ class QueryExecutionJob(BaseModel):
         # Set encoding to UTF-8-SIG to automatically handle BOM if present
         # Azure blob storage often returns CSV files with UTF-8 BOM encoding
         if response.status_code == 200:
-            response.encoding = 'utf-8-sig'
+            response.encoding = "utf-8-sig"
 
         return response
 

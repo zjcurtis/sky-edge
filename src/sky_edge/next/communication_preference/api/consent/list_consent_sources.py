@@ -1,0 +1,168 @@
+from http import HTTPStatus
+from typing import Any
+
+import httpx
+
+from sky_edge.next import errors
+from sky_edge.next.client import AuthenticatedClient, Client
+from sky_edge.next.types import UNSET, Response, Unset
+
+from ...models.consent_source_collection import ConsentSourceCollection
+
+
+def _get_kwargs(
+    *,
+    include_inactive: bool | Unset = UNSET,
+) -> dict[str, Any]:
+    params: dict[str, Any] = {}
+
+    params["include_inactive"] = include_inactive
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+    _kwargs: dict[str, Any] = {
+        "method": "get",
+        "url": "/v1/consent/sources",
+        "params": params,
+    }
+
+    return _kwargs
+
+
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> ConsentSourceCollection | None:
+    if response.status_code == 200:
+        response_200 = ConsentSourceCollection.from_dict(response.json())
+
+        return response_200
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[ConsentSourceCollection]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    include_inactive: bool | Unset = UNSET,
+) -> Response[ConsentSourceCollection]:
+    """Consent sources
+
+     Returns a list of consent sources.
+
+    Args:
+        include_inactive (bool | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[ConsentSourceCollection]
+    """
+
+    kwargs = _get_kwargs(
+        include_inactive=include_inactive,
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+
+def sync(
+    *,
+    client: AuthenticatedClient | Client,
+    include_inactive: bool | Unset = UNSET,
+) -> ConsentSourceCollection | None:
+    """Consent sources
+
+     Returns a list of consent sources.
+
+    Args:
+        include_inactive (bool | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        ConsentSourceCollection
+    """
+
+    return sync_detailed(
+        client=client,
+        include_inactive=include_inactive,
+    ).parsed
+
+
+async def asyncio_detailed(
+    *,
+    client: AuthenticatedClient | Client,
+    include_inactive: bool | Unset = UNSET,
+) -> Response[ConsentSourceCollection]:
+    """Consent sources
+
+     Returns a list of consent sources.
+
+    Args:
+        include_inactive (bool | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[ConsentSourceCollection]
+    """
+
+    kwargs = _get_kwargs(
+        include_inactive=include_inactive,
+    )
+
+    response = await client.get_async_httpx_client().request(**kwargs)
+
+    return _build_response(client=client, response=response)
+
+
+async def asyncio(
+    *,
+    client: AuthenticatedClient | Client,
+    include_inactive: bool | Unset = UNSET,
+) -> ConsentSourceCollection | None:
+    """Consent sources
+
+     Returns a list of consent sources.
+
+    Args:
+        include_inactive (bool | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        ConsentSourceCollection
+    """
+
+    return (
+        await asyncio_detailed(
+            client=client,
+            include_inactive=include_inactive,
+        )
+    ).parsed

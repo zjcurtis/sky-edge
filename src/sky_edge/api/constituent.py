@@ -514,12 +514,14 @@ def phone_delete(phone: Phone) -> Response:
         url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
     )
 
+
 def phone_patch(phone: Phone) -> Response:
     return api_request(
         method=HttpMethods.PATCH,
         url=f"https://api.sky.blackbaud.com/constituent/v1/phones/{phone.id}",
         data=phone.model_dump_json(exclude_none=False),
     )
+
 
 def alias_post(alias: AliasAdd) -> Response:
     response = api_request(

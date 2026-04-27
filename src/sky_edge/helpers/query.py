@@ -76,4 +76,4 @@ def execute_query_by_name(
                     if fetched_response.status_code == 200:
                         # Use .text.encode() to get bytes without BOM
                         # fetch_content() sets encoding to 'utf-8-sig' which strips BOM
-                        return fetched_response.text.encode('utf-8')
+                        return fetched_response.text.encode("utf-8")

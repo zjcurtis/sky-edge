@@ -81,4 +81,3 @@ def get_overlapping_addresses(
             overlapping_pairs.append((addr1, addr2))
 
     return overlapping_pairs
-
