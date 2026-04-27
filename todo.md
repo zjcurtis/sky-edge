@@ -1,3 +1,0 @@
-## Align more closely with the base API
-
-The base api uses multiple objects with different field requirements for what *basically* is the same thing, like adding an alias uses a different object than reading one. I've so far ignored this, but it makes the nullability of fields pretty bad, and it would probably be easier to maintain if sky-edge were a simple *port* of the spec, and then perhaps more opinionated abstractions existed on top of it. 
