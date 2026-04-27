@@ -1,6 +1,6 @@
 """A client library for accessing Constituent"""
 
-from .client import AuthenticatedClient, Client
+from sky_edge.next.client import AuthenticatedClient, Client
 
 __all__ = (
     "AuthenticatedClient",
