@@ -37,9 +37,9 @@ class ContentType(StrEnum):
 
 
 class Collection(BaseModel, Generic[T]):
-    count: int
+    count: int | None
     next_link: Optional[str] = None
-    value: List[T]
+    value: List[T] | None
 
     def fetch_next(self) -> Optional["Collection[T]"] | Response:
         if not self.next_link:
