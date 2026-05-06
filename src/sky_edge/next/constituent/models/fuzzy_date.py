@@ -45,23 +45,24 @@ class FuzzyDate:
 
         return field_dict
 
+    
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        d = dict(src_dict)
-        d = d.pop("d", UNSET)
-
-        m = d.pop("m", UNSET)
-
-        y = d.pop("y", UNSET)
-
+        _data = dict(src_dict)
+    
+        d = _data.pop("d", UNSET)
+        m = _data.pop("m", UNSET)
+        y = _data.pop("y", UNSET)
+    
         fuzzy_date = cls(
             d=d,
             m=m,
             y=y,
         )
-
-        fuzzy_date.additional_properties = d
+    
+        fuzzy_date.additional_properties = _data
         return fuzzy_date
+
 
     @property
     def additional_keys(self) -> list[str]:
